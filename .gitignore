@@ -1,0 +1,16 @@
+bazarr/**
+duckdns/**
+jellyfin/**
+lidarr/**
+pihole/**
+portainer/**
+qbittorrent/**
+sonarr/**
+wireguard/**
+heimdall/**
+jellyseerr/**
+nginx/**
+plex/**
+prowlarr/**
+radarr/**
+.env

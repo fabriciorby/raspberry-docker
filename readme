@@ -1,0 +1,35 @@
+this needs to be done to be able to use wireguard and access pihole (that uses macvlan)
+due docker network limitations, it's not possible to connect the vpn to the macvlan
+the solution is to create a bridge between these wireguard and the pihole_network
+
+first create the pihole network
+then run this after creating wireguard
+
+sudo ip link add macvlan0 link eth0 type macvlan mode bridge
+sudo ip addr add ${PIHOLE_BRIDGE} dev macvlan0
+sudo ip link set macvlan0 up
+
+to persist after reboot
+create a systemctl shit
+------------------------
+
+[Unit]
+Description=Create macvlan0 for WireGuard
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip link add macvlan0 link eth0 type macvlan mode bridge
+ExecStart=/sbin/ip addr add ${PIHOLE_BRIDGE} dev macvlan0
+ExecStart=/sbin/ip link set macvlan0 up
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+
+-------------------
+then
+
+sudo systemctl enable macvlan0.service
+sudo systemctl start macvlan0.service
+

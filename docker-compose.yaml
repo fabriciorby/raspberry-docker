@@ -1,0 +1,205 @@
+services:
+      
+  plex:
+    image: lscr.io/linuxserver/plex:latest
+    container_name: plex
+    network_mode: host
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - VERSION=docker
+      - PLEX_CLAIM= #optional
+    group_add:
+      - 1002  # GID of 'drive' group
+    volumes:
+      - /home/fabriciorby/docker/plex/library:/config
+      - /mnt/drive/data/media:/data/media
+    restart: unless-stopped
+
+  jellyfin:
+    image: lscr.io/linuxserver/jellyfin:latest
+    container_name: jellyfin
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+      - JELLYFIN_PublishedServerUrl=${RASPBERRY_ADDRESS}/jellyfin
+    volumes:
+      - /home/fabriciorby/docker/jellyfin/config:/config
+      - /mnt/drive/data/media:/data/media
+    ports:
+      - 8096
+      - 8920:8920 #optional
+      - 7359:7359/udp #optional
+      - 1900:1900/udp #optional
+    restart: unless-stopped
+
+  jellyseerr:
+    image: fallenbagel/jellyseerr:latest
+    container_name: jellyseerr
+    environment:
+      - LOG_LEVEL=debug
+      - TZ=Europe/Amsterdam
+    ports:
+      - 5055:5055
+    volumes:
+      - /home/fabriciorby/docker/jellyseerr/config:/app/config
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      start_period: 20s
+      timeout: 3s
+      interval: 15s
+      retries: 3
+    restart: unless-stopped
+
+  vpn:
+    image: qmcgaw/gluetun
+    container_name: gluetun
+    environment: 
+      - VPN_SERVICE_PROVIDER=mullvad
+      - VPN_TYPE=wireguard
+      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
+      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
+      - SERVER_CITIES=Zurich
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - 8080:8080
+      - 6881:6881
+      - 6881:6881/udp
+    restart: unless-stopped
+
+  qbittorrent:
+    image: lscr.io/linuxserver/qbittorrent:latest
+    container_name: qbittorrent
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+      - WEBUI_PORT=8080
+      - TORRENTING_PORT=6881
+    volumes:
+      - /home/fabriciorby/docker/qbittorrent/appdata:/config
+      - /mnt/drive/data/torrents:/data/torrents
+    restart: unless-stopped
+    network_mode: "service:vpn"
+
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/fabriciorby/docker/radarr/data:/config
+      - /mnt/drive/data:/data
+    ports:
+      - 7878:7878
+    restart: unless-stopped
+
+  sonarr:
+    image: lscr.io/linuxserver/sonarr:latest
+    container_name: sonarr
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/fabriciorby/docker/sonarr/data:/config
+      - /mnt/drive/data:/data
+    ports:
+      - 8989:8989
+    restart: unless-stopped
+
+  lidarr:
+    image: lscr.io/linuxserver/lidarr:latest
+    container_name: lidarr
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/fabriciorby/docker/lidarr/data:/config
+      - /mnt/drive/data:/data
+    ports:
+      - 8686:8686
+    restart: unless-stopped
+      
+  bazarr:
+    image: lscr.io/linuxserver/bazarr:latest
+    container_name: bazarr
+    environment:
+      - PUID=0
+      - PGID=1002
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/fabriciorby/docker/bazarr/data:/config
+      - /mnt/drive/data/media:/data/media
+    ports:
+      - 6767:6767
+    restart: unless-stopped
+
+  prowlarr:
+    image: lscr.io/linuxserver/prowlarr:latest
+    container_name: prowlarr
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+    volumes:
+      - /home/fabriciorby/docker/prowlarr/data:/config
+    ports:
+      - 9696:9696
+    restart: unless-stopped
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9443
+    volumes:
+      - /home/fabriciorby/docker/portainer/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  nginx:
+    image: lscr.io/linuxserver/nginx:latest
+    container_name: nginx
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - NGINX_AUTORELOAD=true #optional
+      - NGINX_AUTORELOAD_WATCHLIST= #optional
+    volumes:
+      - /home/fabriciorby/docker/nginx/config:/config
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    depends_on: 
+      - heimdall
+
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - ALLOW_INTERNAL_REQUESTS=false #optional
+      - APP_URL=${RASPBERRY_ADDRESS}/heimdall/ #reserved ip for rpi
+    volumes:
+      - /home/fabriciorby/docker/heimdall/config:/config
+    ports:
+      - 80
+      - 443
+    restart: unless-stopped
