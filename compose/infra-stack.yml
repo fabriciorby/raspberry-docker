@@ -1,0 +1,60 @@
+services:
+
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    ports:
+      - 9443
+    volumes:
+      - /home/fabriciorby/docker/portainer/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+  nginx:
+    image: lscr.io/linuxserver/nginx:latest
+    container_name: nginx
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - NGINX_AUTORELOAD=true #optional
+      - NGINX_AUTORELOAD_WATCHLIST= #optional
+    volumes:
+      - /home/fabriciorby/docker/nginx/config:/config
+    ports:
+      - 80:80
+      - 443:443
+    restart: unless-stopped
+    networks:
+      - infra_default
+      - media_infra_net
+    depends_on: 
+      - heimdall
+
+  heimdall:
+    image: lscr.io/linuxserver/heimdall:latest
+    container_name: heimdall
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Amsterdam
+      - ALLOW_INTERNAL_REQUESTS=false #optional
+      - APP_URL=${RASPBERRY_ADDRESS}/heimdall/ #reserved ip for rpi
+    volumes:
+      - /home/fabriciorby/docker/heimdall/config:/config
+    ports:
+      - 80
+      - 443
+    restart: unless-stopped
+
+networks:
+  infra_default:
+    external: true
+  media_infra_net:
+    external: true

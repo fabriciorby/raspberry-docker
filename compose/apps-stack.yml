@@ -1,0 +1,5 @@
+services:
+  placeholder:
+    image: alpine
+    command: ["echo", "No apps configured yet"]
+

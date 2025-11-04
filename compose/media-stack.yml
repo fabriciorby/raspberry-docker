@@ -34,6 +34,8 @@ services:
       - 7359:7359/udp #optional
       - 1900:1900/udp #optional
     restart: unless-stopped
+    networks:
+      - media_infra_net
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
@@ -52,38 +54,6 @@ services:
       interval: 15s
       retries: 3
     restart: unless-stopped
-
-  vpn:
-    image: qmcgaw/gluetun
-    container_name: gluetun
-    environment: 
-      - VPN_SERVICE_PROVIDER=mullvad
-      - VPN_TYPE=wireguard
-      - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
-      - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
-      - SERVER_CITIES=Zurich
-    cap_add:
-      - NET_ADMIN
-    ports:
-      - 8080:8080
-      - 6881:6881
-      - 6881:6881/udp
-    restart: unless-stopped
-
-  qbittorrent:
-    image: lscr.io/linuxserver/qbittorrent:latest
-    container_name: qbittorrent
-    environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
-      - WEBUI_PORT=8080
-      - TORRENTING_PORT=6881
-    volumes:
-      - /home/fabriciorby/docker/qbittorrent/appdata:/config
-      - /mnt/drive/data/torrents:/data/torrents
-    restart: unless-stopped
-    network_mode: "service:vpn"
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
@@ -154,52 +124,7 @@ services:
       - 9696:9696
     restart: unless-stopped
 
-  watchtower:
-    image: containrrr/watchtower
-    container_name: watchtower
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-
-  portainer:
-    container_name: portainer
-    image: portainer/portainer-ce:latest
-    ports:
-      - 9443
-    volumes:
-      - /home/fabriciorby/docker/portainer/data:/data
-      - /var/run/docker.sock:/var/run/docker.sock
-    restart: unless-stopped
-
-  nginx:
-    image: lscr.io/linuxserver/nginx:latest
-    container_name: nginx
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
-      - NGINX_AUTORELOAD=true #optional
-      - NGINX_AUTORELOAD_WATCHLIST= #optional
-    volumes:
-      - /home/fabriciorby/docker/nginx/config:/config
-    ports:
-      - 80:80
-      - 443:443
-    restart: unless-stopped
-    depends_on: 
-      - heimdall
-
-  heimdall:
-    image: lscr.io/linuxserver/heimdall:latest
-    container_name: heimdall
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
-      - ALLOW_INTERNAL_REQUESTS=false #optional
-      - APP_URL=${RASPBERRY_ADDRESS}/heimdall/ #reserved ip for rpi
-    volumes:
-      - /home/fabriciorby/docker/heimdall/config:/config
-    ports:
-      - 80
-      - 443
-    restart: unless-stopped
+networks:
+  media_infra_net:
+    name: media_infra_net
+    driver: bridge
