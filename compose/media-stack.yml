@@ -27,6 +27,7 @@ services:
       - JELLYFIN_PublishedServerUrl=${RASPBERRY_ADDRESS}/jellyfin
     volumes:
       - /home/fabriciorby/docker/jellyfin/config:/config
+      - /home/fabriciorby/docker/jellyfin/spotlight/:/usr/share/jellyfin/web/UI
       - /mnt/drive/data/media:/data/media
     ports:
       - 8096
@@ -36,6 +37,7 @@ services:
     restart: unless-stopped
     networks:
       - media_infra_net
+    entrypoint: ['sh', '-c', '/usr/share/jellyfin/web/UI/install-spotlight.sh && exec /init']
 
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
