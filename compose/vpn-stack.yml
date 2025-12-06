@@ -5,15 +5,15 @@ services:
     container_name: duckdns
     network_mode: host #optional
     environment:
-      - PUID=1000 #optional
-      - PGID=1000 #optional
-      - TZ=Europe/Amsterdam #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE} #optional
       - SUBDOMAINS=${DUCKDNS_SUBDOMAIN}
       - TOKEN=${DUCKDNS_TOKEN}
       - UPDATE_IP=ipv4 #optional
       - LOG_FILE=false #optional
     volumes:
-      - /home/fabriciorby/docker/duckdns/config:/config #optional
+      - ${DOCKER_DIR}/duckdns/config:/config #optional
     restart: unless-stopped
 
   wireguard:
@@ -23,9 +23,9 @@ services:
       - NET_ADMIN
       - SYS_MODULE #optional
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
       - SERVERURL=${DUCKDNS_SERVER_URL} #optional
       - SERVERPORT=${DUCKDNS_SERVER_PORT} #optional
       - PEERS=5 #optional
@@ -35,8 +35,8 @@ services:
       - PERSISTENTKEEPALIVE_PEERS= #optional
       - LOG_CONFS=true #optional
     volumes:
-      - /home/fabriciorby/docker/wireguard/config:/config
-      - /home/fabriciorby/docker/wireguard/modules:/lib/modules #optional
+      - ${DOCKER_DIR}/wireguard/config:/config
+      - ${DOCKER_DIR}/wireguard/modules:/lib/modules #optional
     ports:
       - 51820:51820/udp
     sysctls:

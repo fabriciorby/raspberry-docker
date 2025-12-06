@@ -56,13 +56,13 @@ all:
 	$(MAKE) up p=vpn
 	$(MAKE) up p=torrent
 	$(MAKE) up p=media
-	$(MAKE) up p=infra
 	$(MAKE) up p=apps
+	$(MAKE) up p=infra
 
 # ==== Stop all projects in reverse order ====
 down-all:
-	$(MAKE) down p=apps
 	$(MAKE) down p=infra
+	$(MAKE) down p=apps
 	$(MAKE) down p=media
 	$(MAKE) down p=torrent
 	$(MAKE) down p=vpn

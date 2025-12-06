@@ -10,8 +10,9 @@ This repository contains a modular Docker-based home lab infrastructure. It is s
 docker/
 ├── .env.example           # Example environment variables
 ├── compose/
+│   ├── apps-stack.yml     # Apps: n8n, Syncthing, your_spotify
 │   ├── media-stack.yml    # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr
-│   ├── infra-stack.yml    # Infrastructure: Nginx, Portainer, Heimdall, Watchtower
+│   ├── infra-stack.yml    # Infrastructure: Traefik, Portainer, Heimdall, Watchtower
 │   ├── vpn-stack.yml      # VPN services: Wireguard, DuckDNS
 │   ├── torrent-stack.yml  # Torrent services: Gluetun, qBittorrent
 │   ├── pihole-stack.yml   # Pi-hole
@@ -28,13 +29,14 @@ docker/
 
 * Fully modular stacks:
 
+  * App Stack: n8n, Syncthing, your_spotify
   * Media Stack: Jellyfin, Plex, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, Jellyseerr
   * Infra Stack: Nginx, Portainer, Heimdall, Watchtower
   * VPN Stack: Wireguard, DuckDNS
   * Torrent Stack: Gluetun, qBittorrent
   * Pi-hole Stack
 * `.env` support for secrets and configuration
-* Separate networks for isolation, with shared network for Nginx and media services
+* Separate networks for isolation, with shared network for traefik, apps and media services
 * Makefile for simplified commands (`make up`, `make down`, `make all`, etc.)
 * Automatic removal of orphan containers
 
@@ -96,8 +98,8 @@ make all
   2. VPN
   3. Torrent
   4. Media (Jellyfin, Plex, etc.)
-  5. Infra (Nginx, Portainer, Heimdall)
-  6. Apps (if any)
+  5. Apps (n8n, Syncthing, your_spotify)
+  6. Infra (Traefik, Portainer, Heimdall)
 
 ### Stop all stacks
 
@@ -109,7 +111,8 @@ make down-all
 
 ## Networks
 
-* `media_infra_net` (external network): shared between Nginx and all media services
+* `media_infra_net` (external network): shared between Traefik and all apps and media services
+* `app_infra_net` (external network): shared between Traefik and all apps and media services
 * Each stack also has its own default network for isolation:
 
   * VPN: `vpn_default`
@@ -121,7 +124,7 @@ make down-all
 
 ## Notes
 
-* Nginx must start after media services to resolve hostnames like `jellyfin`
+* Traefik must start after media services to resolve hostnames like `jellyfin`
 * Healthchecks can be added for reliable startup
 * Make sure the `.env` file exists in the project root; Compose uses it automatically
 * Orphan containers can be removed using:
@@ -145,7 +148,7 @@ docker compose -f compose/<stack>.yml up -d
 
 ## Recommendations
 
-* Keep your media services and Nginx on the shared network (`media_infra_net`)
+* Keep your media services and Traefik on the shared network (`media_infra_net`)
 * Other stacks can remain isolated
 * Use `.env` and `secrets/` to avoid committing sensitive data
 * Use Makefile commands to simplify stack management

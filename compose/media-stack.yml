@@ -5,32 +5,88 @@ services:
     container_name: plex
     network_mode: host
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
       - VERSION=docker
       - PLEX_CLAIM= #optional
     group_add:
-      - 1002  # GID of 'drive' group
+      - ${PGID}  # GID of 'drive' group
     volumes:
-      - /home/fabriciorby/docker/plex/library:/config
-      - /mnt/drive/data/media:/data/media
+      - ${DOCKER_DIR}/plex/library:/config
+      - /mnt/media/data/media:/data/media
     restart: unless-stopped
 
   jellyfin:
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
-      - JELLYFIN_PublishedServerUrl=${RASPBERRY_ADDRESS}/jellyfin
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
+      - JELLYFIN_PublishedServerUrl=home.${DOMAIN_NAME}/jellyfin
     volumes:
-      - /home/fabriciorby/docker/jellyfin/config:/config
-      - /home/fabriciorby/docker/jellyfin/spotlight/:/usr/share/jellyfin/web/UI
-      - /mnt/drive/data/media:/data/media
+      - ${DOCKER_DIR}/jellyfin/config:/config
+      - ${DOCKER_DIR}/jellyfin/spotlight/:/usr/share/jellyfin/web/UI
+      - /mnt/media/data/media:/data/media
+    labels:
+      - 'traefik.enable=true'
+      ## HTTP Router
+      #### Entry point where Jellyfin is accessible via
+      #### Change secure to https in the line below to have accessible without needing to specify a port and change the SSLHost option below
+      - 'traefik.http.routers.jellyfin.entryPoints=websecure'
+      #### Host or Path where Jellyfin is accessible
+      #### Remove (or change) this rule if you'd rather have Jellyfin accessible at a PathPrefix URI
+      - 'traefik.http.routers.jellyfin.rule=Host(`home.${DOMAIN_NAME}`) && PathPrefix(`/jellyfin`)'
+      #### Enable TLS with the ACME/LetsEncrypt resolver for HOSTNAME.DOMAIN_NAME
+      - 'traefik.http.routers.jellyfin.tls=true'
+      - 'traefik.http.routers.jellyfin.tls.certResolver=mytlschallenge'
+      - 'traefik.http.routers.jellyfin.tls.domains=home.${DOMAIN_NAME}'
+      ## Middleware
+      - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw'
+      #### The customResponseHeaders option lists the Header names and values to apply to the response.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex'
+      #### The sslRedirect is set to true, then only allow https requests.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLRedirect=true'
+      #### The sslHost option is the host name that is used to redirect http requests to https.
+      #### This is the exact URL that will be redirected to, so you can remove the :9999 port if using default SSL port
+      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLHost=home.${DOMAIN_NAME}'
+      #### Set sslForceHost to true and set SSLHost to forced requests to use SSLHost even the ones that are already using SSL.
+      #### Note that this uses SSLHost verbatim, so add the port to SSLHost if you are using an alternate port.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLForceHost=true'
+      #### The stsSeconds is the max-age of the Strict-Transport-Security header. If set to 0, would NOT include the header.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.STSSeconds=315360000'
+      #### The stsIncludeSubdomains is set to true, the includeSubDomains directive will be
+      #### appended to the Strict-Transport-Security header.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains=true'
+      #### Set stsPreload to true to have the preload flag appended to the Strict-Transport-Security header.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.STSPreload=true'
+      #### Set forceSTSHeader to true, to add the STS header even when the connection is HTTP.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.forceSTSHeader=true'
+      #### Set frameDeny to true to add the X-Frame-Options header with the value of DENY.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.frameDeny=true'
+      #### Set contentTypeNosniff to true to add the X-Content-Type-Options header with the value nosniff.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.contentTypeNosniff=true'
+      #### Set browserXssFilter to true to add the X-XSS-Protection header with the value 1; mode=block.
+      - 'traefik.http.middlewares.jellyfin-mw.headers.customresponseheaders.X-XSS-PROTECTION=1'
+      #### The customFrameOptionsValue allows the X-Frame-Options header value to be set with a custom value. This
+      #### overrides the FrameDeny option.
+      - "traefik.http.middlewares.jellyfin-mw.headers.customFrameOptionsValue='allow-from https://${DOMAIN_NAME}'"
+      ## HTTP Service
+      # We define the port here as a port is required, but note that the service is pointing to the service defined in @file
+      - 'traefik.http.routers.jellyfin.service=jellyfin-svc'
+      - 'traefik.http.services.jellyfin-svc.loadBalancer.server.port=8096'
+      - 'traefik.http.services.jellyfin-svc.loadBalancer.passHostHeader=true'
+      ## Redirection of HTTP on port 9999 to HTTPS on port 9999 (consistent protocol)
+      - 'traefik.http.routers.jellyfin-insecure.entryPoints=web'
+      - 'traefik.http.routers.jellyfin-insecure.rule=Host(`home.${DOMAIN_NAME}`) && PathPrefix(`/jellyfin`)'
+      - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw'
+      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.scheme=https'
+      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.port=9999' # remove if you are using a default port
+      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.permanent=false'
+      - 'traefik.http.routers.jellyfin-insecure.service=noop@internal'
     ports:
-      - 8096
+      - 8096:8096
       - 8920:8920 #optional
       - 7359:7359/udp #optional
       - 1900:1900/udp #optional
@@ -44,11 +100,11 @@ services:
     container_name: jellyseerr
     environment:
       - LOG_LEVEL=debug
-      - TZ=Europe/Amsterdam
+      - TZ=${GENERIC_TIMEZONE}
     ports:
       - 5055:5055
     volumes:
-      - /home/fabriciorby/docker/jellyseerr/config:/app/config
+      - ${DOCKER_DIR}/jellyseerr/config:/app/config
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
       start_period: 20s
@@ -61,12 +117,12 @@ services:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
-      - /home/fabriciorby/docker/radarr/data:/config
-      - /mnt/drive/data:/data
+      - ${DOCKER_DIR}/radarr/data:/config
+      - /mnt/media/data:/data
     ports:
       - 7878:7878
     restart: unless-stopped
@@ -75,12 +131,12 @@ services:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
-      - /home/fabriciorby/docker/sonarr/data:/config
-      - /mnt/drive/data:/data
+      - ${DOCKER_DIR}/sonarr/data:/config
+      - /mnt/media/data:/data
     ports:
       - 8989:8989
     restart: unless-stopped
@@ -89,12 +145,12 @@ services:
     image: lscr.io/linuxserver/lidarr:latest
     container_name: lidarr
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
-      - /home/fabriciorby/docker/lidarr/data:/config
-      - /mnt/drive/data:/data
+      - ${DOCKER_DIR}/lidarr/data:/config
+      - /mnt/media/data:/data
     ports:
       - 8686:8686
     restart: unless-stopped
@@ -103,12 +159,12 @@ services:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
-      - /home/fabriciorby/docker/bazarr/data:/config
-      - /mnt/drive/data/media:/data/media
+      - ${DOCKER_DIR}/bazarr/data:/config
+      - /mnt/media/data/media:/data/media
     ports:
       - 6767:6767
     restart: unless-stopped
@@ -117,11 +173,11 @@ services:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
     volumes:
-      - /home/fabriciorby/docker/prowlarr/data:/config
+      - ${DOCKER_DIR}/prowlarr/data:/config
     ports:
       - 9696:9696
     restart: unless-stopped

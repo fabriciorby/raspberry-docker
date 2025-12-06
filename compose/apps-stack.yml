@@ -1,5 +1,115 @@
 services:
-  placeholder:
-    image: alpine
-    command: ["echo", "No apps configured yet"]
 
+  n8n:
+    image: docker.n8n.io/n8nio/n8n
+    container_name: n8n
+    restart: always
+    ports:
+      - "5678:5678"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
+      - traefik.http.routers.n8n.tls=true
+      - traefik.http.routers.n8n.entrypoints=web,websecure
+      - traefik.http.routers.n8n.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.n8n.headers.SSLRedirect=true
+      - traefik.http.middlewares.n8n.headers.STSSeconds=315360000
+      - traefik.http.middlewares.n8n.headers.browserXSSFilter=true
+      - traefik.http.middlewares.n8n.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.n8n.headers.forceSTSHeader=true
+      - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.n8n.headers.STSPreload=true
+      - traefik.http.routers.n8n.middlewares=n8n@docker
+    environment:
+      - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+      - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - N8N_PROXY_HOPS=1
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_TELEMETRY_ENABLED=false
+      - NODE_ENV=production
+      - WEBHOOK_URL=https://${SUBDOMAIN}.${DOMAIN_NAME}/
+      - GENERIC_TIMEZONE=${GENERIC_TIMEZONE}
+      - TZ=${GENERIC_TIMEZONE}
+    volumes:
+      - ${DOCKER_DIR}/n8n/data:/home/node/.n8n
+      - ${DOCKER_DIR}/n8n/files:/files
+    networks:
+      - apps_infra_net
+
+  syncthing:
+    image: lscr.io/linuxserver/syncthing:latest
+    container_name: syncthing
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
+    volumes:
+      - ${DOCKER_DIR}/syncthing/config:/config
+    ports:
+      - 8384:8384
+      - 22000:22000/tcp
+      - 22000:22000/udp
+      - 21027:21027/udp
+    restart: unless-stopped
+    networks:
+      - apps_infra_net
+
+  your_spotify:
+    image: lscr.io/linuxserver/your_spotify:latest
+    container_name: your_spotify
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.spotify.rule=Host(`spotify.${DOMAIN_NAME}`)
+      - traefik.http.routers.spotify.tls=true
+      - traefik.http.routers.spotify.entrypoints=web,websecure
+      - traefik.http.routers.spotify.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.spotify.headers.SSLRedirect=true
+      - traefik.http.middlewares.spotify.headers.STSSeconds=315360000
+      - traefik.http.middlewares.spotify.headers.browserXSSFilter=true
+      - traefik.http.middlewares.spotify.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.spotify.headers.forceSTSHeader=true
+      - traefik.http.middlewares.spotify.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.spotify.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.spotify.headers.STSPreload=true
+      - traefik.http.routers.spotify.middlewares=spotify@docker
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
+      - APP_URL=https://spotify.${DOMAIN_NAME}
+      - SPOTIFY_PUBLIC=${SPOTIFY_PUBLIC}
+      - SPOTIFY_SECRET=${SPOTIFY_SECRET}
+      - CORS=http://spotify.${DOMAIN_NAME}:80,https://spotify.${DOMAIN_NAME}:443
+      - MONGO_ENDPOINT=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/spotify?authSource=admin
+      - LOG_LEVEL=debug
+    ports:
+      - 8123:80
+      - 8124:443
+    restart: unless-stopped
+    networks:
+      - apps_infra_net
+    depends_on: 
+      - mongo
+
+  mongo:
+    image: 'mongo:latest'
+    container_name: mongo
+    ports:
+      - '27017:27017'
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+    volumes:
+      - ${DOCKER_DIR}/mongo/db:/data/db
+    networks:
+      - apps_infra_net
+
+networks:
+  apps_default:
+    external: true
+  apps_infra_net:
+    name: apps_infra_net
+    driver: bridge

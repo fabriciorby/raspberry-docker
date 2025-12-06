@@ -21,13 +21,13 @@ services:
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     environment:
-      - PUID=0
-      - PGID=1002
-      - TZ=Europe/Amsterdam
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
       - WEBUI_PORT=8080
       - TORRENTING_PORT=6881
     volumes:
-      - /home/fabriciorby/docker/qbittorrent/appdata:/config
-      - /mnt/drive/data/torrents:/data/torrents
+      - ${DOCKER_DIR}/qbittorrent/appdata:/config
+      - /mnt/media/data/torrents:/data/torrents
     restart: unless-stopped
     network_mode: "service:gluetun"
