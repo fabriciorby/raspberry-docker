@@ -43,7 +43,7 @@ services:
       - 'traefik.http.routers.jellyfin.tls.certResolver=mytlschallenge'
       - 'traefik.http.routers.jellyfin.tls.domains=home.${DOMAIN_NAME}'
       ## Middleware
-      - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw'
+      - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw,fail2ban-jellyfin@docker'
       #### The customResponseHeaders option lists the Header names and values to apply to the response.
       - 'traefik.http.middlewares.jellyfin-mw.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex'
       #### The sslRedirect is set to true, then only allow https requests.
@@ -80,11 +80,18 @@ services:
       ## Redirection of HTTP on port 9999 to HTTPS on port 9999 (consistent protocol)
       - 'traefik.http.routers.jellyfin-insecure.entryPoints=web'
       - 'traefik.http.routers.jellyfin-insecure.rule=Host(`home.${DOMAIN_NAME}`) && PathPrefix(`/jellyfin`)'
-      - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw'
+      - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw,fail2ban-jellyfin@docker'
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.scheme=https'
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.port=9999' # remove if you are using a default port
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.permanent=false'
       - 'traefik.http.routers.jellyfin-insecure.service=noop@internal'
+      ## Fail2Ban
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.bantime=10m
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.maxretry=4
+      - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.statuscode=401
     ports:
       - 8096:8096
       - 8920:8920 #optional

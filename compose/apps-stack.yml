@@ -20,7 +20,13 @@ services:
       - traefik.http.middlewares.n8n.headers.SSLHost=${DOMAIN_NAME}
       - traefik.http.middlewares.n8n.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.n8n.headers.STSPreload=true
-      - traefik.http.routers.n8n.middlewares=n8n@docker
+      - traefik.http.routers.n8n.middlewares=n8n@docker,fail2ban-n8n@docker
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.rules.bantime=10m
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.rules.maxretry=4
+      - traefik.http.middlewares.fail2ban-n8n.plugin.fail2ban.rules.statuscode=401
     environment:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}
