@@ -54,14 +54,14 @@ services:
       - TZ=${GENERIC_TIMEZONE}
     volumes:
       - ${DOCKER_DIR}/syncthing/config:/config
+      - ${DOCKER_DIR}:/docker
+      - /mnt/drive/sync:/sync
     ports:
       - 8384:8384
       - 22000:22000/tcp
       - 22000:22000/udp
       - 21027:21027/udp
     restart: unless-stopped
-    networks:
-      - apps_infra_net
 
   your_spotify:
     image: lscr.io/linuxserver/your_spotify:latest
