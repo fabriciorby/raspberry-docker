@@ -105,6 +105,29 @@ services:
   jellyseerr:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.jellyseerr.rule=Host(`discover.${DOMAIN_NAME}`)
+      - traefik.http.routers.jellyseerr.tls=true
+      - traefik.http.routers.jellyseerr.entrypoints=web,websecure
+      - traefik.http.routers.jellyseerr.tls.certresolver=mytlschallenge
+      - traefik.http.middlewares.jellyseerr.headers.SSLRedirect=true
+      - traefik.http.middlewares.jellyseerr.headers.STSSeconds=315360000
+      - traefik.http.middlewares.jellyseerr.headers.browserXSSFilter=true
+      - traefik.http.middlewares.jellyseerr.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.jellyseerr.headers.forceSTSHeader=true
+      - traefik.http.middlewares.jellyseerr.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.jellyseerr.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.jellyseerr.headers.STSPreload=true
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.bantime=10m
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.maxretry=4
+      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.statuscode=401
+      # - traefik.http.middlewares.f2b.plugin.fail2ban.rules.urlregexps[0].regexp=/api/v1/auth/me
+      # - traefik.http.middlewares.f2b.plugin.fail2ban.rules.urlregexps[0].mode=allow
+      - traefik.http.routers.jellyseerr.middlewares=jellyseerr@docker,fail2ban-jellyseerr@docker
     environment:
       - LOG_LEVEL=debug
       - TZ=${GENERIC_TIMEZONE}
@@ -119,6 +142,8 @@ services:
       interval: 15s
       retries: 3
     restart: unless-stopped
+    networks:
+      - media_infra_net
 
   radarr:
     image: lscr.io/linuxserver/radarr:latest
