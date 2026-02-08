@@ -16,6 +16,7 @@ docker/
 │   ├── vpn-stack.yml      # VPN services: Wireguard, DuckDNS
 │   ├── torrent-stack.yml  # Torrent services: Gluetun, qBittorrent
 │   ├── pihole-stack.yml   # Pi-hole
+│   ├── immich-stack.yml   # Immich
 ├── secrets/               # Secrets for containers (e.g., db passwords)
 │   └── db_password.txt
 ├── Makefile               # Helper commands to manage stacks
@@ -35,6 +36,7 @@ docker/
   * VPN Stack: Wireguard, DuckDNS
   * Torrent Stack: Gluetun, qBittorrent
   * Pi-hole Stack
+  * Photos Stack: Immich
 * `.env` support for secrets and configuration
 * Separate networks for isolation, with shared network for traefik, apps and media services
 * Makefile for simplified commands (`make up`, `make down`, `make all`, etc.)
@@ -99,7 +101,8 @@ make all
   3. Torrent
   4. Media (Jellyfin, Plex, etc.)
   5. Apps (n8n, Syncthing, your_spotify)
-  6. Infra (Traefik, Portainer, Heimdall)
+  6. Photos (Immich)
+  7. Infra (Traefik, Portainer, Heimdall)
 
 ### Stop all stacks
 

@@ -17,4 +17,6 @@ sonarr/**
 syncthing/**
 traefik/**
 wireguard/**
+immich/**
+maintainerr/**
 .env

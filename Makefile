@@ -16,6 +16,7 @@ APPS_FILE=$(COMPOSE_DIR)/apps-stack.yml
 TORRENT_FILE=$(COMPOSE_DIR)/torrent-stack.yml
 PIHOLE_FILE=$(COMPOSE_DIR)/pihole-stack.yml
 VPN_FILE=$(COMPOSE_DIR)/vpn-stack.yml
+PHOTOS_FILE=$(COMPOSE_DIR)/immich-stack.yml
 
 .PHONY: up down restart all down-all
 
@@ -28,6 +29,7 @@ up:
 		torrent) FILE=$(TORRENT_FILE) ;; \
 		pihole) FILE=$(PIHOLE_FILE) ;; \
 		vpn) FILE=$(VPN_FILE) ;; \
+		photos) FILE=$(PHOTOS_FILE) ;; \
 		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
 	esac; \
 	echo "Bringing up project $(p)..."; \
@@ -42,6 +44,7 @@ down:
 		torrent) FILE=$(TORRENT_FILE) ;; \
 		pihole) FILE=$(PIHOLE_FILE) ;; \
 		vpn) FILE=$(VPN_FILE) ;; \
+		photos) FILE=$(PHOTOS_FILE) ;; \
 		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
 	esac; \
 	echo "Stopping project $(p)..."; \
@@ -57,11 +60,13 @@ all:
 	$(MAKE) up p=torrent
 	$(MAKE) up p=media
 	$(MAKE) up p=apps
+	$(MAKE) up p=photos
 	$(MAKE) up p=infra
 
 # ==== Stop all projects in reverse order ====
 down-all:
 	$(MAKE) down p=infra
+	$(MAKE) down p=photos
 	$(MAKE) down p=apps
 	$(MAKE) down p=media
 	$(MAKE) down p=torrent
