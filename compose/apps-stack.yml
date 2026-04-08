@@ -72,12 +72,18 @@ services:
       - traefik.http.routers.spotify.tls=true
       - traefik.http.routers.spotify.entrypoints=web,websecure
       - traefik.http.routers.spotify.tls.certresolver=mytlschallenge
+      # Segundo Domínio (.by)
+      - traefik.http.routers.spotify-by.rule=Host(`spotify.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.spotify-by.tls=true
+      - traefik.http.routers.spotify-by.entrypoints=web,websecure
+      - traefik.http.routers.spotify-by.tls.certResolver=mytlschallenge
+
       - traefik.http.middlewares.spotify.headers.SSLRedirect=true
       - traefik.http.middlewares.spotify.headers.STSSeconds=315360000
       - traefik.http.middlewares.spotify.headers.browserXSSFilter=true
       - traefik.http.middlewares.spotify.headers.contentTypeNosniff=true
       - traefik.http.middlewares.spotify.headers.forceSTSHeader=true
-      - traefik.http.middlewares.spotify.headers.SSLHost=${DOMAIN_NAME}
+      # - traefik.http.middlewares.spotify.headers.SSLHost=${DOMAIN_NAME}
       - traefik.http.middlewares.spotify.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.spotify.headers.STSPreload=true
       - traefik.http.routers.spotify.middlewares=spotify@docker
@@ -88,9 +94,9 @@ services:
       - APP_URL=https://spotify.${DOMAIN_NAME}
       - SPOTIFY_PUBLIC=${SPOTIFY_PUBLIC}
       - SPOTIFY_SECRET=${SPOTIFY_SECRET}
-      - CORS=http://spotify.${DOMAIN_NAME}:80,https://spotify.${DOMAIN_NAME}:443
+      - CORS=http://spotify.${DOMAIN_NAME}:80,https://spotify.${DOMAIN_NAME}:443,http://spotify.${DOMAIN_NAME_NEW}:80,https://spotify.${DOMAIN_NAME_NEW}:443
       - MONGO_ENDPOINT=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/spotify?authSource=admin
-      - LOG_LEVEL=debug
+      - LOG_LEVEL=info
     ports:
       - 8123:80
       - 8124:443

@@ -31,56 +31,46 @@ services:
       - /mnt/media/data/media:/data/media
     labels:
       - 'traefik.enable=true'
-      ## HTTP Router
-      #### Entry point where Jellyfin is accessible via
-      #### Change secure to https in the line below to have accessible without needing to specify a port and change the SSLHost option below
+
+      # Primeiro Dominio
       - 'traefik.http.routers.jellyfin.entryPoints=websecure'
-      #### Host or Path where Jellyfin is accessible
-      #### Remove (or change) this rule if you'd rather have Jellyfin accessible at a PathPrefix URI
       - 'traefik.http.routers.jellyfin.rule=Host(`home.${DOMAIN_NAME}`) && PathPrefix(`/jellyfin`)'
-      #### Enable TLS with the ACME/LetsEncrypt resolver for HOSTNAME.DOMAIN_NAME
       - 'traefik.http.routers.jellyfin.tls=true'
       - 'traefik.http.routers.jellyfin.tls.certResolver=mytlschallenge'
       - 'traefik.http.routers.jellyfin.tls.domains=home.${DOMAIN_NAME}'
-      ## Middleware
       - 'traefik.http.routers.jellyfin.middlewares=jellyfin-mw,fail2ban-jellyfin@docker'
-      #### The customResponseHeaders option lists the Header names and values to apply to the response.
+
+      # Segundo Domínio (.by)
+      - 'traefik.http.routers.jellyfin-by.entryPoints=websecure'
+      - 'traefik.http.routers.jellyfin-by.rule=Host(`home.${DOMAIN_NAME_NEW}`) && PathPrefix(`/jellyfin`)'
+      - 'traefik.http.routers.jellyfin-by.tls=true'
+      - 'traefik.http.routers.jellyfin-by.tls.certResolver=mytlschallenge'
+      - 'traefik.http.routers.jellyfin-by.middlewares=jellyfin-mw,fail2ban-jellyfin@docker'
+      - 'traefik.http.routers.jellyfin-by.service=jellyfin-svc'
+
+      # Middlewares
       - 'traefik.http.middlewares.jellyfin-mw.headers.customResponseHeaders.X-Robots-Tag=noindex,nofollow,nosnippet,noarchive,notranslate,noimageindex'
-      #### The sslRedirect is set to true, then only allow https requests.
       - 'traefik.http.middlewares.jellyfin-mw.headers.SSLRedirect=true'
-      #### The sslHost option is the host name that is used to redirect http requests to https.
-      #### This is the exact URL that will be redirected to, so you can remove the :9999 port if using default SSL port
-      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLHost=home.${DOMAIN_NAME}'
-      #### Set sslForceHost to true and set SSLHost to forced requests to use SSLHost even the ones that are already using SSL.
-      #### Note that this uses SSLHost verbatim, so add the port to SSLHost if you are using an alternate port.
-      - 'traefik.http.middlewares.jellyfin-mw.headers.SSLForceHost=true'
-      #### The stsSeconds is the max-age of the Strict-Transport-Security header. If set to 0, would NOT include the header.
+      # - 'traefik.http.middlewares.jellyfin-mw.headers.SSLHost=home.${DOMAIN_NAME}'
+      # - 'traefik.http.middlewares.jellyfin-mw.headers.SSLForceHost=true'
       - 'traefik.http.middlewares.jellyfin-mw.headers.STSSeconds=315360000'
-      #### The stsIncludeSubdomains is set to true, the includeSubDomains directive will be
-      #### appended to the Strict-Transport-Security header.
       - 'traefik.http.middlewares.jellyfin-mw.headers.STSIncludeSubdomains=true'
-      #### Set stsPreload to true to have the preload flag appended to the Strict-Transport-Security header.
       - 'traefik.http.middlewares.jellyfin-mw.headers.STSPreload=true'
-      #### Set forceSTSHeader to true, to add the STS header even when the connection is HTTP.
       - 'traefik.http.middlewares.jellyfin-mw.headers.forceSTSHeader=true'
-      #### Set frameDeny to true to add the X-Frame-Options header with the value of DENY.
-      - 'traefik.http.middlewares.jellyfin-mw.headers.frameDeny=true'
-      #### Set contentTypeNosniff to true to add the X-Content-Type-Options header with the value nosniff.
       - 'traefik.http.middlewares.jellyfin-mw.headers.contentTypeNosniff=true'
-      #### Set browserXssFilter to true to add the X-XSS-Protection header with the value 1; mode=block.
       - 'traefik.http.middlewares.jellyfin-mw.headers.customresponseheaders.X-XSS-PROTECTION=1'
-      #### The customFrameOptionsValue allows the X-Frame-Options header value to be set with a custom value. This
-      #### overrides the FrameDeny option.
-      - "traefik.http.middlewares.jellyfin-mw.headers.customFrameOptionsValue='allow-from https://${DOMAIN_NAME}'"
+      - "traefik.http.middlewares.jellyfin-mw.headers.customFrameOptionsValue=SAMEORIGIN"
+      - "traefik.http.middlewares.jellyfin-mw.headers.customResponseHeaders.Content-Security-Policy=frame-ancestors 'self' https://home.${DOMAIN_NAME} https://home.${DOMAIN_NAME_NEW}"
+
       ## HTTP Service
-      # We define the port here as a port is required, but note that the service is pointing to the service defined in @file
       - 'traefik.http.routers.jellyfin.service=jellyfin-svc'
       - 'traefik.http.services.jellyfin-svc.loadBalancer.server.port=8096'
       - 'traefik.http.services.jellyfin-svc.loadBalancer.passHostHeader=true'
-      ## Redirection of HTTP on port 9999 to HTTPS on port 9999 (consistent protocol)
+
       - 'traefik.http.routers.jellyfin-insecure.entryPoints=web'
-      - 'traefik.http.routers.jellyfin-insecure.rule=Host(`home.${DOMAIN_NAME}`) && PathPrefix(`/jellyfin`)'
+      - 'traefik.http.routers.jellyfin-insecure.rule=(Host(`home.${DOMAIN_NAME}`) || Host(`home.${DOMAIN_NAME_NEW}`)) && PathPrefix(`/jellyfin`)'
       - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw,fail2ban-jellyfin@docker'
+
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.scheme=https'
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.port=9999' # remove if you are using a default port
       - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.permanent=false'
@@ -111,12 +101,19 @@ services:
       - traefik.http.routers.jellyseerr.tls=true
       - traefik.http.routers.jellyseerr.entrypoints=web,websecure
       - traefik.http.routers.jellyseerr.tls.certresolver=mytlschallenge
+
+      # Segundo Domínio (.by)
+      - traefik.http.routers.jellyseerr-by.rule=Host(`discover.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.jellyseerr-by.tls=true
+      - traefik.http.routers.jellyseerr-by.entrypoints=web,websecure
+      - traefik.http.routers.jellyseerr-by.tls.certResolver=mytlschallenge
+
       - traefik.http.middlewares.jellyseerr.headers.SSLRedirect=true
       - traefik.http.middlewares.jellyseerr.headers.STSSeconds=315360000
       - traefik.http.middlewares.jellyseerr.headers.browserXSSFilter=true
       - traefik.http.middlewares.jellyseerr.headers.contentTypeNosniff=true
       - traefik.http.middlewares.jellyseerr.headers.forceSTSHeader=true
-      - traefik.http.middlewares.jellyseerr.headers.SSLHost=${DOMAIN_NAME}
+      # - traefik.http.middlewares.jellyseerr.headers.SSLHost=${DOMAIN_NAME}
       - traefik.http.middlewares.jellyseerr.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.jellyseerr.headers.STSPreload=true
       - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
@@ -215,6 +212,96 @@ services:
     ports:
       - 9696:9696
     restart: unless-stopped
+
+  maintainerr:
+    image: ghcr.io/maintainerr/maintainerr:latest # or maintainerr/maintainerr:latest
+    container_name: maintainerr
+    user: 1000:1000
+    volumes:
+      - ${DOCKER_DIR}/maintainerr/data:/opt/data
+    environment:
+      - TZ=${GENERIC_TIMEZONE}
+#      - BASE_PATH=/maintainerr # uncomment if you're serving maintainerr from a subdirectory
+#      - UI_HOSTNAME=:: # uncomment if you want to listen on IPv6 instead (default 0.0.0.0)
+#      - UI_PORT=6247 # uncomment to change the UI port (default 6246)
+#      - GITHUB_TOKEN=ghp_yourtoken # Optional: GitHub Personal Access Token for higher API rate limits (60/hr without, 5000/hr with token)
+    ports:
+      - 6246:6246
+    restart: unless-stopped
+
+  alternatrr:
+    image: ghcr.io/soredake/alternatrr:latest
+    platform: linux/amd64
+    container_name: alternatrr
+    environment:
+    - ConnectionStrings__DefaultConnection=Data Source=/opt/alternatrr/app/alternatrr.db
+    - ConnectionStrings__sonarr=Data Source=/opt/sonarr/sonarr.db
+    - Login__Username=${ALTERNATRR_LOGIN}
+    - Login__Password=${ALTERNATRR_PW}
+    # - VIRTUAL_HOST=alternatrr.YOURDOMAIN.COM
+    # - VIRTUAL_PORT=80
+    # - LETSENCRYPT_HOST=alternatrr.YOURDOMAIN.COM
+    # - LETSENCRYPT_EMAIL=YOUREMAILADDRESS
+    ports:
+      - 6247:80
+    volumes:
+    - ${DOCKER_DIR}/sonarr/data:/opt/sonarr  #Mounting the directory with sonarr.db in it
+    - ${DOCKER_DIR}/alternatrr/app:/opt/alternatrr/app #Mounting the alternatrr.db peristent login
+
+  suwayomi_server:
+    image: ghcr.io/suwayomi/suwayomi-server:latest
+    container_name: suwayomi-server
+    volumes: # The order matters! Make sure the downloads is first in the volume list or it will not work!
+      - /mnt/media/data/suwayomi-server/downloads:/home/suwayomi/.local/share/Tachidesk/downloads
+      - /mnt/media/data/suwayomi-server/files:/home/suwayomi/.local/share/Tachidesk
+    ports:
+      - 4568:4567
+    restart: unless-stopped
+
+  kavita:
+    image: lscr.io/linuxserver/kavita:latest
+    container_name: kavita
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.kavita.rule=Host(`kavita.${DOMAIN_NAME}`)
+      - traefik.http.routers.kavita.tls=true
+      - traefik.http.routers.kavita.entrypoints=web,websecure
+      - traefik.http.routers.kavita.tls.certresolver=mytlschallenge
+
+      # Segundo Domínio (.by)
+      - traefik.http.routers.kavita-by.rule=Host(`kavita.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.kavita-by.tls=true
+      - traefik.http.routers.kavita-by.entrypoints=web,websecure
+      - traefik.http.routers.kavita-by.tls.certResolver=mytlschallenge
+
+      - traefik.http.middlewares.kavita.headers.SSLRedirect=true
+      - traefik.http.middlewares.kavita.headers.STSSeconds=315360000
+      - traefik.http.middlewares.kavita.headers.browserXSSFilter=true
+      - traefik.http.middlewares.kavita.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.kavita.headers.forceSTSHeader=true
+      # - traefik.http.middlewares.jellyseerr.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.kavita.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.kavita.headers.STSPreload=true
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.rules.bantime=10m
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.rules.maxretry=4
+      - traefik.http.middlewares.fail2ban-kavita.plugin.fail2ban.rules.statuscode=401
+      - traefik.http.routers.kavita.middlewares=kavita@docker,fail2ban-kavita@docker
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${GENERIC_TIMEZONE}
+    volumes:
+      - ${DOCKER_DIR}/kavita/config:/config
+      - /mnt/media/data/suwayomi-server/files/local:/data/local
+      - /mnt/media/data/suwayomi-server/downloads:/data/downloads
+    ports:
+      - 5000:5000
+    restart: unless-stopped
+    networks:
+      - media_infra_net
 
 networks:
   media_infra_net:
