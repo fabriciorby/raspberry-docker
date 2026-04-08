@@ -11,7 +11,7 @@ docker/
 ├── .env.example           # Example environment variables
 ├── compose/
 │   ├── apps-stack.yml     # Apps: n8n, Syncthing, your_spotify
-│   ├── media-stack.yml    # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr
+│   ├── media-stack.yml    # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi
 │   ├── infra-stack.yml    # Infrastructure: Traefik, Portainer, Heimdall, Watchtower
 │   ├── vpn-stack.yml      # VPN services: Wireguard, DuckDNS
 │   ├── torrent-stack.yml  # Torrent services: Gluetun, qBittorrent
@@ -31,7 +31,7 @@ docker/
 * Fully modular stacks:
 
   * App Stack: n8n, Syncthing, your_spotify
-  * Media Stack: Jellyfin, Plex, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, Jellyseerr
+  * Media Stack: Jellyfin, Plex, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi
   * Infra Stack: Nginx, Portainer, Heimdall, Watchtower
   * VPN Stack: Wireguard, DuckDNS
   * Torrent Stack: Gluetun, qBittorrent
