@@ -17,7 +17,7 @@ services:
     labels:
       - homepage.group=Observability
       - homepage.name=cAdvisor
-      - homepage.icon=cadvisor.svg
+      - homepage.icon=cadvisor.png
       - homepage.href=${RASPBERRY_ADDRESS}:6969
       - homepage.description=Metrics exporter
     restart: unless-stopped

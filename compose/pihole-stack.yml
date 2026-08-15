@@ -5,7 +5,7 @@ services:
     labels:
       - homepage.group=PiHole
       - homepage.name=PiHole
-      - homepage.icon=pihole.svg
+      - homepage.icon=pi-hole.svg
       - homepage.href=${PIHOLE_NETWORK_IP}
       - homepage.description=Metrics exporter
     image: pihole/pihole:latest

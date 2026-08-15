@@ -18,6 +18,11 @@ services:
       - homepage.icon=immich.svg
       - homepage.href=${RASPBERRY_ADDRESS}:2283
       - homepage.description=Self hosted Google Photos
+      - homepage.widget.type=immich
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:2283
+      - homepage.widget.key=${IMMICH_API_KEY}
+      - homepage.widget.fields=["users","photos","videos","storage"]
+      - homepage.widget.version=2
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     # extends:
     #   file: hwaccel.transcoding.yml

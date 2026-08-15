@@ -60,14 +60,13 @@ services:
       - media_infra_net
       - apps_infra_net
 
-
   homepage:
       image: ghcr.io/gethomepage/homepage:latest
       container_name: homepage
       restart: unless-stopped
       user: root
       environment:
-        - HOMEPAGE_ALLOWED_HOSTS=${RASPBERRY_ADDRESS}:3001
+        - HOMEPAGE_ALLOWED_HOSTS=${RASPBERRY_IP}:3001
       volumes:
         # Pasta onde ficarão as configurações do painel
         - ../homepage/config:/app/config 
@@ -76,6 +75,10 @@ services:
       # Como você usa Traefik, não precisa abrir portas, basta colocar as labels do Traefik aqui:
       ports:
        - "3001:3000"
+      networks:
+        - infra_default
+        - media_infra_net
+        - apps_infra_net
 
 networks:
   infra_default:

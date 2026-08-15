@@ -43,6 +43,16 @@ services:
       - homepage.icon=jellyfin.svg
       - homepage.href=https://home.${DOMAIN_NAME}/jellyfin
       - homepage.description=Jellyfin
+      - homepage.widget.type=jellyfin
+      - homepage.widget.url=https://home.${DOMAIN_NAME}/jellyfin
+      - homepage.widget.key=${JELLYFIN_API_KEY}
+      - homepage.widget.version=1
+      - homepage.widget.enableBlocks=true
+      - homepage.widget.enableNowPlaying=true
+      - homepage.widget.enableUser=true
+      - homepage.widget.enableMediaControl=true
+      - homepage.widget.showEpisodeNumber=true
+      - homepage.widget.expandOneStreamToTwoRows=true
 
       - 'traefik.enable=true'
 
@@ -112,9 +122,13 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Jellyseerr
-      - homepage.icon=Jellyseerr.svg
+      - homepage.icon=jellyseerr.svg
       - homepage.href=https://discover.${DOMAIN_NAME}
       - homepage.description=User frienfly movie requester
+      - homepage.widget.type=seerr
+      - homepage.widget.url=https://discover.${DOMAIN_NAME}
+      - homepage.widget.key=${SEERR_API_KEY}
+      - homepage.widget.fields=["pending","approved","available","completed"]
 
       - traefik.enable=true
       - traefik.http.routers.jellyseerr.rule=Host(`discover.${DOMAIN_NAME}`)
@@ -173,6 +187,11 @@ services:
       - homepage.icon=radarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:7878
       - homepage.description=Movie management
+      - homepage.widget.type=radarr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:7878
+      - homepage.widget.key=${RADARR_API_KEY}
+      - homepage.widget.fields=["wanted","missing","queued","movies"]
+      - homepage.widget.enableQueue=true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -193,6 +212,11 @@ services:
       - homepage.icon=sonarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:8989
       - homepage.description=Series management
+      - homepage.widget.type=sonarr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:8989
+      - homepage.widget.key=${SONARR_API_KEY}
+      - homepage.widget.fields=["wanted","queued","series"]
+      - homepage.widget.enableQueue=true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -213,6 +237,10 @@ services:
       - homepage.icon=lidarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:8686
       - homepage.description=Music management
+      - homepage.widget.type=lidarr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:8686
+      - homepage.widget.key=${LIDARR_API_KEY}
+      - homepage.widget.fields=["wanted","queued","artists"]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -233,6 +261,10 @@ services:
       - homepage.icon=bazarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:6767
       - homepage.description=Subtitle management
+      - homepage.widget.type=bazarr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:6767
+      - homepage.widget.key=${BAZARR_API_KEY}
+      - homepage.widget.fields=["missingEpisodes","missingMovies"]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -253,6 +285,10 @@ services:
       - homepage.icon=prowlarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:9696
       - homepage.description=Tracker management
+      - homepage.widget.type=prowlarr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:9696
+      - homepage.widget.key=${PROWLARR_API_KEY}
+      - homepage.widget.fields=["numberOfGrabs", "numberOfQueries", "numberOfFailGrabs", "numberOfFailQueries"]
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -272,6 +308,8 @@ services:
       - homepage.icon=maintainerr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:6246
       - homepage.description=Deletion automation and Collection management
+      - homepage.widget.type=maintainerr
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:6246
     user: 1000:1000
     volumes:
       - ${DOCKER_DIR}/maintainerr/data:/opt/data
@@ -292,7 +330,7 @@ services:
     labels:
       - homepage.group=Media
       - homepage.name=Alternatrr
-      - homepage.icon=alternatrr.svg
+      - homepage.icon=configarr.svg
       - homepage.href=${RASPBERRY_ADDRESS}:6247
       - homepage.description=Sonarr metadata management
     environment:
