@@ -22,4 +22,7 @@ maintainerr/**
 alternatrr/**
 kavita/**
 dispatcharr/**
+grafana/**
+homepage/**
+prometheus/**
 .env

@@ -2,6 +2,12 @@
 services:
   pihole:
     container_name: pihole
+    labels:
+      - homepage.group=PiHole
+      - homepage.name=PiHole
+      - homepage.icon=pihole.svg
+      - homepage.href=${PIHOLE_NETWORK_IP}
+      - homepage.description=Metrics exporter
     image: pihole/pihole:latest
     ports:
       # DNS Ports

@@ -12,6 +12,12 @@
 services:
   immich-server:
     container_name: immich_server
+    labels:
+      - homepage.group=Immich
+      - homepage.name=Immich
+      - homepage.icon=immich.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:2283
+      - homepage.description=Self hosted Google Photos
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     # extends:
     #   file: hwaccel.transcoding.yml

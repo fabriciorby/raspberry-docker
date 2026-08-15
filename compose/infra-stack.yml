@@ -11,6 +11,12 @@ services:
   portainer:
     container_name: portainer
     image: portainer/portainer-ce:latest
+    labels:
+      - homepage.group=Infra
+      - homepage.name=Portainer
+      - homepage.icon=portainer.svg
+      - homepage.href=https://${RASPBERRY_ADDRESS}:9443
+      - homepage.description=Docker Management
     ports:
       - 9443:9443
     volumes:
@@ -22,6 +28,12 @@ services:
     image: "traefik"
     container_name: "traefik"
     restart: always
+    labels:
+      - homepage.group=Infra
+      - homepage.name=Traefik
+      - homepage.icon=traefik.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:8081
+      - homepage.description=Docker Reverse Proxy
     command:
       # - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -48,21 +60,22 @@ services:
       - media_infra_net
       - apps_infra_net
 
-  heimdall:
-    image: lscr.io/linuxserver/heimdall:latest
-    container_name: heimdall
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${GENERIC_TIMEZONE}
-      - ALLOW_INTERNAL_REQUESTS=false #optional
-      - APP_URL=${RASPBERRY_ADDRESS}/heimdall/ #reserved ip for rpi
-    volumes:
-      - ${DOCKER_DIR}/heimdall/config:/config
-    ports:
-      - 80
-      - 443
-    restart: unless-stopped
+
+  homepage:
+      image: ghcr.io/gethomepage/homepage:latest
+      container_name: homepage
+      restart: unless-stopped
+      user: root
+      environment:
+        - HOMEPAGE_ALLOWED_HOSTS=${RASPBERRY_ADDRESS}:3001
+      volumes:
+        # Pasta onde ficarão as configurações do painel
+        - ../homepage/config:/app/config 
+        # Necessário para ele "ler" os outros containers do Docker
+        - /var/run/docker.sock:/var/run/docker.sock:ro 
+      # Como você usa Traefik, não precisa abrir portas, basta colocar as labels do Traefik aqui:
+      ports:
+       - "3001:3000"
 
 networks:
   infra_default:

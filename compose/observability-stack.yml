@@ -1,0 +1,89 @@
+version: '3.8'
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+services:
+  # 1. Coletor de Métricas dos Containers e Host
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    user: root
+    container_name: cadvisor
+    labels:
+      - homepage.group=Observability
+      - homepage.name=cAdvisor
+      - homepage.icon=cadvisor.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:6969
+      - homepage.description=Metrics exporter
+    restart: unless-stopped
+    privileged: true
+    devices:
+      - /dev/kmsg:/dev/kmsg
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /mnt/media/docker-data:/mnt/media/docker-data:ro # Seu data-root customizado do HD
+      - /dev/disk/:/dev/disk:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    ports:
+      - "6969:8080"
+    command:
+      - '--housekeeping_interval=30s'            # Leitura a cada 15s em vez de instantânea
+      - '--global_housekeeping_interval=30s'
+      - '--disable_metrics=percpu,sched,tcp,udp' # Desativa métricas pesadas que raramente são usadas
+      - '--storage_duration=2m0s'
+    networks:
+      - monitoring
+
+  # 2. Banco de Dados Temporal (Guarda o histórico de uso de RAM/CPU)
+  prometheus:
+    image: prom/prometheus:latest
+    user: 1000:1000
+    container_name: prometheus
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Prometheus
+      - homepage.icon=prometheus.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:9090
+      - homepage.description=Metrics scraper
+    restart: unless-stopped
+    volumes:
+      - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../prometheus/data:/prometheus
+    environment:
+      - GOMEMLIMIT=700MiB                  # 1. Avisa o sistema para limpar a RAM ao chegar em 700MB
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d' # Mantém histórico por 15 dias para economizar disco
+      - '--storage.tsdb.wal-compression'
+    ports:
+      - "9090:9090"
+    networks:
+      - monitoring
+
+  # 3. Painel Visual de Gráficos
+  grafana:
+    image: grafana/grafana:latest
+    user: 1000:1000
+    container_name: grafana
+    labels:
+      - homepage.group=Observability
+      - homepage.name=Grafana
+      - homepage.icon=grafana.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:3000
+      - homepage.description=Metrics Dashboard
+    restart: unless-stopped
+    volumes:
+      - ../grafana/data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      - monitoring

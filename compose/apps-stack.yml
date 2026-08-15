@@ -1,12 +1,17 @@
 services:
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n
+    image: docker.n8n.io/n8nio/n8n:1.75.2
     container_name: n8n
     restart: always
     ports:
       - "5678:5678"
     labels:
+      - homepage.group=Apps
+      - homepage.name=N8N
+      - homepage.icon=n8n.svg
+      - homepage.href=https://${SUBDOMAIN}.${DOMAIN_NAME}
+      - homepage.description=N8N
       - traefik.enable=true
       - traefik.http.routers.n8n.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME}`)
       - traefik.http.routers.n8n.tls=true
@@ -48,6 +53,12 @@ services:
   syncthing:
     image: lscr.io/linuxserver/syncthing:latest
     container_name: syncthing
+    labels:
+      - homepage.group=Apps
+      - homepage.name=Syncthing
+      - homepage.icon=syncthing.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:8384
+      - homepage.description=Sync things
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -67,6 +78,11 @@ services:
     image: lscr.io/linuxserver/your_spotify:latest
     container_name: your_spotify
     labels:
+      - homepage.group=Apps
+      - homepage.name=Your Spotify
+      - homepage.icon=spotify.svg
+      - homepage.href=https://spotify.${DOMAIN_NAME}
+      - homepage.description=Check your Spotify stats
       - traefik.enable=true
       - traefik.http.routers.spotify.rule=Host(`spotify.${DOMAIN_NAME}`)
       - traefik.http.routers.spotify.tls=true

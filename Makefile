@@ -17,6 +17,7 @@ TORRENT_FILE=$(COMPOSE_DIR)/torrent-stack.yml
 PIHOLE_FILE=$(COMPOSE_DIR)/pihole-stack.yml
 VPN_FILE=$(COMPOSE_DIR)/vpn-stack.yml
 PHOTOS_FILE=$(COMPOSE_DIR)/immich-stack.yml
+OBSERVABILITY_FILE=$(COMPOSE_DIR)/observability-stack.yml
 
 .PHONY: up down restart all down-all
 
@@ -30,6 +31,7 @@ up:
 		pihole) FILE=$(PIHOLE_FILE) ;; \
 		vpn) FILE=$(VPN_FILE) ;; \
 		photos) FILE=$(PHOTOS_FILE) ;; \
+		observability) FILE=$(OBSERVABILITY_FILE) ;; \
 		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
 	esac; \
 	echo "Bringing up project $(p)..."; \
@@ -45,6 +47,7 @@ down:
 		pihole) FILE=$(PIHOLE_FILE) ;; \
 		vpn) FILE=$(VPN_FILE) ;; \
 		photos) FILE=$(PHOTOS_FILE) ;; \
+		observability) FILE=$(OBSERVABILITY_FILE) ;; \
 		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
 	esac; \
 	echo "Stopping project $(p)..."; \
@@ -62,9 +65,11 @@ all:
 	$(MAKE) up p=apps
 	$(MAKE) up p=photos
 	$(MAKE) up p=infra
+	$(MAKE) up p=observability
 
 # ==== Stop all projects in reverse order ====
 down-all:
+	$(MAKE) down p=observability
 	$(MAKE) down p=infra
 	$(MAKE) down p=photos
 	$(MAKE) down p=apps

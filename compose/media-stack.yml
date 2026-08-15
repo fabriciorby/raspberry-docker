@@ -3,6 +3,12 @@ services:
   plex:
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
+    labels:
+      - homepage.group=Media
+      - homepage.name=Plex
+      - homepage.icon=plex.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:32400
+      - homepage.description=Plex
     network_mode: host
     environment:
       - PUID=${PUID}
@@ -15,6 +21,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/plex/library:/config
       - /mnt/media/data/media:/data/media
+      - /dev/shm:/transcode
     restart: unless-stopped
 
   jellyfin:
@@ -29,7 +36,14 @@ services:
       - ${DOCKER_DIR}/jellyfin/config:/config
       - ${DOCKER_DIR}/jellyfin/spotlight/:/usr/share/jellyfin/web/UI
       - /mnt/media/data/media:/data/media
+      - /dev/shm:/transcode
     labels:
+      - homepage.group=Media
+      - homepage.name=Jellyfin
+      - homepage.icon=jellyfin.svg
+      - homepage.href=https://home.${DOMAIN_NAME}/jellyfin
+      - homepage.description=Jellyfin
+
       - 'traefik.enable=true'
 
       # Primeiro Dominio
@@ -96,6 +110,12 @@ services:
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     labels:
+      - homepage.group=Media
+      - homepage.name=Jellyseerr
+      - homepage.icon=Jellyseerr.svg
+      - homepage.href=https://discover.${DOMAIN_NAME}
+      - homepage.description=User frienfly movie requester
+
       - traefik.enable=true
       - traefik.http.routers.jellyseerr.rule=Host(`discover.${DOMAIN_NAME}`)
       - traefik.http.routers.jellyseerr.tls=true
@@ -147,6 +167,12 @@ services:
   radarr:
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Radarr
+      - homepage.icon=radarr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:7878
+      - homepage.description=Movie management
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -161,6 +187,12 @@ services:
   sonarr:
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Sonarr
+      - homepage.icon=sonarr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:8989
+      - homepage.description=Series management
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -175,6 +207,12 @@ services:
   lidarr:
     image: lscr.io/linuxserver/lidarr:latest
     container_name: lidarr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Lidarr
+      - homepage.icon=lidarr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:8686
+      - homepage.description=Music management
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -189,6 +227,12 @@ services:
   bazarr:
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Bazarr
+      - homepage.icon=bazarr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:6767
+      - homepage.description=Subtitle management
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -203,6 +247,12 @@ services:
   prowlarr:
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Prowlarr
+      - homepage.icon=prowlarr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:9696
+      - homepage.description=Tracker management
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
@@ -216,6 +266,12 @@ services:
   maintainerr:
     image: ghcr.io/maintainerr/maintainerr:latest # or maintainerr/maintainerr:latest
     container_name: maintainerr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Maintainerr
+      - homepage.icon=maintainerr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:6246
+      - homepage.description=Deletion automation and Collection management
     user: 1000:1000
     volumes:
       - ${DOCKER_DIR}/maintainerr/data:/opt/data
@@ -233,6 +289,12 @@ services:
     image: ghcr.io/soredake/alternatrr:latest
     platform: linux/amd64
     container_name: alternatrr
+    labels:
+      - homepage.group=Media
+      - homepage.name=Alternatrr
+      - homepage.icon=alternatrr.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:6247
+      - homepage.description=Sonarr metadata management
     environment:
     - ConnectionStrings__DefaultConnection=Data Source=/opt/alternatrr/app/alternatrr.db
     - ConnectionStrings__sonarr=Data Source=/opt/sonarr/sonarr.db
@@ -251,6 +313,12 @@ services:
   suwayomi_server:
     image: ghcr.io/suwayomi/suwayomi-server:latest
     container_name: suwayomi-server
+    labels:
+      - homepage.group=Media
+      - homepage.name=Suwayomi Server
+      - homepage.icon=suwayomi.svg
+      - homepage.href=${RASPBERRY_ADDRESS}:4568
+      - homepage.description=Manga management
     volumes: # The order matters! Make sure the downloads is first in the volume list or it will not work!
       - /mnt/media/data/suwayomi-server/downloads:/home/suwayomi/.local/share/Tachidesk/downloads
       - /mnt/media/data/suwayomi-server/files:/home/suwayomi/.local/share/Tachidesk
@@ -262,6 +330,12 @@ services:
     image: lscr.io/linuxserver/kavita:latest
     container_name: kavita
     labels:
+      - homepage.group=Media
+      - homepage.name=Kavita
+      - homepage.icon=kavita.svg
+      - homepage.href=https://kavita.${DOMAIN_NAME}
+      - homepage.description=Manga bookshelf
+
       - traefik.enable=true
       - traefik.http.routers.kavita.rule=Host(`kavita.${DOMAIN_NAME}`)
       - traefik.http.routers.kavita.tls=true
@@ -303,22 +377,28 @@ services:
     networks:
       - media_infra_net
 
-  dispatcharr:
-    image: ghcr.io/dispatcharr/dispatcharr:latest
-    restart: unless-stopped
-    container_name: dispatcharr
-    ports:
-      - 9191:9191
-    volumes:
-      - ${DOCKER_DIR}/dispatcharr/data:/data
-    environment:
-      - PUID=${PUID}
-      - PGID=${PGID}
-      - TZ=${GENERIC_TIMEZONE}
-      - DISPATCHARR_ENV=aio
-      - REDIS_HOST=localhost
-      - CELERY_BROKER_URL=redis://localhost:6379/0
-      - DISPATCHARR_LOG_LEVEL=info
+  # dispatcharr:
+  #   image: ghcr.io/dispatcharr/dispatcharr:latest
+  #   restart: unless-stopped
+  #   container_name: dispatcharr
+    # labels:
+    #   - homepage.group=Media
+    #   - homepage.name=Dispatcharr
+    #   - homepage.icon=dispatcharr.svg
+    #   - homepage.href=${RASPBERRY_ADDRESS}:9191
+    #   - homepage.description=IPTV Management
+  #   ports:
+  #     - 9191:9191
+  #   volumes:
+  #     - ${DOCKER_DIR}/dispatcharr/data:/data
+  #   environment:
+  #     - PUID=${PUID}
+  #     - PGID=${PGID}
+  #     - TZ=${GENERIC_TIMEZONE}
+  #     - DISPATCHARR_ENV=aio
+  #     - REDIS_HOST=localhost
+  #     - CELERY_BROKER_URL=redis://localhost:6379/0
+  #     - DISPATCHARR_LOG_LEVEL=info
 
 networks:
   media_infra_net:
