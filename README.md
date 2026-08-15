@@ -8,18 +8,19 @@ This repository contains a modular Docker-based home lab infrastructure. It is s
 
 ```
 docker/
-├── .env.example           # Example environment variables
+├── .env.example                  # Example environment variables
 ├── compose/
-│   ├── apps-stack.yml     # Apps: n8n, Syncthing, your_spotify
-│   ├── media-stack.yml    # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi, Dispatcharr
-│   ├── infra-stack.yml    # Infrastructure: Traefik, Portainer, Heimdall, Watchtower,
-│   ├── vpn-stack.yml      # VPN services: Wireguard, DuckDNS
-│   ├── torrent-stack.yml  # Torrent services: Gluetun, qBittorrent
-│   ├── pihole-stack.yml   # Pi-hole
-│   ├── immich-stack.yml   # Immich
-├── secrets/               # Secrets for containers (e.g., db passwords)
+│   ├── apps-stack.yml            # Apps: n8n, Syncthing, your_spotify
+│   ├── media-stack.yml           # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi, Dispatcharr
+│   ├── infra-stack.yml           # Infrastructure: Traefik, Portainer, Heimdall, Watchtower,
+│   ├── vpn-stack.yml             # VPN services: Wireguard, DuckDNS
+│   ├── torrent-stack.yml         # Torrent services: Gluetun, qBittorrent
+│   ├── pihole-stack.yml          # Pi-hole
+│   ├── immich-stack.yml          # Immich
+│   ├── observability-stack.yml   # Grafana, Prometheus and cAdvisor
+├── secrets/                      # Secrets for containers (e.g., db passwords)
 │   └── db_password.txt
-├── Makefile               # Helper commands to manage stacks
+├── Makefile                      # Helper commands to manage stacks
 ├── .gitignore
 └── README.md
 ```
@@ -37,6 +38,7 @@ docker/
   * Torrent Stack: Gluetun, qBittorrent
   * Pi-hole Stack
   * Photos Stack: Immich
+  * Observability: Grafana, Prometheus and cAdvisor
 * `.env` support for secrets and configuration
 * Separate networks for isolation, with shared network for traefik, apps and media services
 * Makefile for simplified commands (`make up`, `make down`, `make all`, etc.)
@@ -103,6 +105,7 @@ make all
   5. Apps (n8n, Syncthing, your_spotify)
   6. Photos (Immich)
   7. Infra (Traefik, Portainer, Heimdall)
+  8. Observability (Grafana, Prometheus, cAdvisor)
 
 ### Stop all stacks
 
@@ -122,6 +125,7 @@ make down-all
   * Pi-hole: `pihole_network`
   * Torrent: `torrent_default`
   * Infra: `infra_default`
+  * Observability: `monitoring`
 
 ---
 
