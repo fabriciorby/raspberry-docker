@@ -46,6 +46,9 @@ services:
       - '--global_housekeeping_interval=30s'
       - '--disable_metrics=percpu,sched,tcp,udp' # Desativa métricas pesadas que raramente são usadas
       - '--storage_duration=2m0s'
+      # Container labels would otherwise be exported as-is, including the Homepage widget API keys
+      - '--store_container_labels=false'
+      - '--whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project'
     networks:
       - monitoring
 
