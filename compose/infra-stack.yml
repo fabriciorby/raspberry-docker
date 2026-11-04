@@ -1,6 +1,13 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   watchtower:
+    logging: *default-logging
     image: containrrr/watchtower
     container_name: watchtower
     environment:
@@ -9,6 +16,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
   portainer:
+    logging: *default-logging
     container_name: portainer
     image: portainer/portainer-ce:latest
     labels:
@@ -25,6 +33,7 @@ services:
     restart: unless-stopped
 
   traefik:
+    logging: *default-logging
     image: "traefik"
     container_name: "traefik"
     restart: always
@@ -66,6 +75,7 @@ services:
       - apps_infra_net
 
   homepage:
+      logging: *default-logging
       image: ghcr.io/gethomepage/homepage:latest
       container_name: homepage
       restart: unless-stopped

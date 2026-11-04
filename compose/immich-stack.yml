@@ -9,8 +9,15 @@
 
 #name: immich
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   immich-server:
+    logging: *default-logging
     container_name: immich_server
     labels:
       - homepage.group=Immich
@@ -44,6 +51,7 @@ services:
       disable: false
 
   immich-machine-learning:
+    logging: *default-logging
     container_name: immich_machine_learning
     # For hardware acceleration, add one of -[armnn, cuda, rocm, openvino, rknn] to the image tag.
     # Example tag: ${IMMICH_VERSION:-release}-cuda
@@ -60,6 +68,7 @@ services:
       disable: false
 
   redis:
+    logging: *default-logging
     container_name: immich_redis
     image: docker.io/valkey/valkey:8@sha256:81db6d39e1bba3b3ff32bd3a1b19a6d69690f94a3954ec131277b9a26b95b3aa
     healthcheck:
@@ -67,6 +76,7 @@ services:
     restart: always
 
   database:
+    logging: *default-logging
     container_name: immich_postgres
     image: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0@sha256:bcf63357191b76a916ae5eb93464d65c07511da41e3bf7a8416db519b40b1c23
     environment:

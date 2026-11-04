@@ -1,6 +1,13 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   plex:
+    logging: *default-logging
     image: lscr.io/linuxserver/plex:latest
     container_name: plex
     labels:
@@ -25,6 +32,7 @@ services:
     restart: unless-stopped
 
   jellyfin:
+    logging: *default-logging
     image: lscr.io/linuxserver/jellyfin:latest
     container_name: jellyfin
     environment:
@@ -117,6 +125,7 @@ services:
     entrypoint: ['sh', '-c', '/usr/share/jellyfin/web/UI/install-spotlight.sh && exec /init']
 
   jellyseerr:
+    logging: *default-logging
     image: fallenbagel/jellyseerr:latest
     container_name: jellyseerr
     labels:
@@ -180,6 +189,7 @@ services:
       - media_infra_net
 
   radarr:
+    logging: *default-logging
     image: lscr.io/linuxserver/radarr:latest
     container_name: radarr
     labels:
@@ -205,6 +215,7 @@ services:
     restart: unless-stopped
 
   sonarr:
+    logging: *default-logging
     image: lscr.io/linuxserver/sonarr:latest
     container_name: sonarr
     labels:
@@ -230,6 +241,7 @@ services:
     restart: unless-stopped
 
   lidarr:
+    logging: *default-logging
     image: lscr.io/linuxserver/lidarr:latest
     container_name: lidarr
     labels:
@@ -254,6 +266,7 @@ services:
     restart: unless-stopped
 
   bazarr:
+    logging: *default-logging
     image: lscr.io/linuxserver/bazarr:latest
     container_name: bazarr
     labels:
@@ -278,6 +291,7 @@ services:
     restart: unless-stopped
 
   prowlarr:
+    logging: *default-logging
     image: lscr.io/linuxserver/prowlarr:latest
     container_name: prowlarr
     labels:
@@ -301,6 +315,7 @@ services:
     restart: unless-stopped
 
   maintainerr:
+    logging: *default-logging
     image: ghcr.io/maintainerr/maintainerr:latest # or maintainerr/maintainerr:latest
     container_name: maintainerr
     labels:
@@ -325,6 +340,7 @@ services:
     restart: unless-stopped
 
   alternatrr:
+    logging: *default-logging
     image: ghcr.io/soredake/alternatrr:latest
     platform: linux/amd64
     container_name: alternatrr
@@ -350,6 +366,7 @@ services:
     - ${DOCKER_DIR}/alternatrr/app:/opt/alternatrr/app #Mounting the alternatrr.db peristent login
 
   suwayomi_server:
+    logging: *default-logging
     image: ghcr.io/suwayomi/suwayomi-server:latest
     container_name: suwayomi-server
     labels:
@@ -366,6 +383,7 @@ services:
     restart: unless-stopped
 
   kavita:
+    logging: *default-logging
     image: lscr.io/linuxserver/kavita:latest
     container_name: kavita
     labels:

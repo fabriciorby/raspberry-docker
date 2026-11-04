@@ -1,6 +1,13 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   gluetun:
+    logging: *default-logging
     image: qmcgaw/gluetun
     container_name: gluetun
     environment: 
@@ -18,6 +25,7 @@ services:
     restart: unless-stopped
 
   qbittorrent:
+    logging: *default-logging
     image: lscr.io/linuxserver/qbittorrent:latest
     container_name: qbittorrent
     labels:
@@ -40,6 +48,7 @@ services:
 
   # Stops downloads when the torrent disk has less than MIN_FREE_GB free
   qbit-diskguard:
+    logging: *default-logging
     image: curlimages/curl:8.11.1
     container_name: qbit-diskguard
     user: ${PUID}:${PGID}

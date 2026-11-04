@@ -1,6 +1,13 @@
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   pihole:
+    logging: *default-logging
     container_name: pihole
     labels:
       - homepage.group=PiHole

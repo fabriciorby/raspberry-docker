@@ -8,9 +8,16 @@ volumes:
   prometheus_data:
   grafana_data:
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   # 1. Coletor de Métricas dos Containers e Host
   cadvisor:
+    logging: *default-logging
     image: gcr.io/cadvisor/cadvisor:latest
     user: root
     container_name: cadvisor
@@ -44,6 +51,7 @@ services:
 
   # 2. Banco de Dados Temporal (Guarda o histórico de uso de RAM/CPU)
   prometheus:
+    logging: *default-logging
     image: prom/prometheus:latest
     user: 1000:1000
     container_name: prometheus
@@ -71,6 +79,7 @@ services:
 
   # 3. Painel Visual de Gráficos
   grafana:
+    logging: *default-logging
     image: grafana/grafana:latest
     user: 1000:1000
     container_name: grafana

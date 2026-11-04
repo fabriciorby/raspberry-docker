@@ -1,6 +1,13 @@
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
 
   n8n:
+    logging: *default-logging
     image: docker.n8n.io/n8nio/n8n:stable
     container_name: n8n
     restart: always
@@ -51,6 +58,7 @@ services:
       - apps_infra_net
 
   syncthing:
+    logging: *default-logging
     image: lscr.io/linuxserver/syncthing:latest
     container_name: syncthing
     labels:
@@ -75,6 +83,7 @@ services:
     restart: unless-stopped
 
   your_spotify:
+    logging: *default-logging
     image: lscr.io/linuxserver/your_spotify:latest
     container_name: your_spotify
     labels:
@@ -124,6 +133,7 @@ services:
       - mongo
 
   mongo:
+    logging: *default-logging
     # Mongo 8 crashes on the 39-bit kernel8.img, which Immich's Redis needs (16K pages break jemalloc)
     image: 'mongo:7.0'
     container_name: mongo
