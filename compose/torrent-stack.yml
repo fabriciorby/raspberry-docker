@@ -37,3 +37,24 @@ services:
       - /mnt/media/data/torrents:/data/torrents
     restart: unless-stopped
     network_mode: "service:gluetun"
+
+  # Stops downloads when the torrent disk has less than MIN_FREE_GB free
+  qbit-diskguard:
+    image: curlimages/curl:8.11.1
+    container_name: qbit-diskguard
+    user: ${PUID}:${PGID}
+    entrypoint: ["/bin/sh", "/qbit-diskguard.sh"]
+    environment:
+      - TZ=${GENERIC_TIMEZONE}
+      - QBITTORRENT_USERNAME=${QBITTORRENT_USERNAME}
+      - QBITTORRENT_PASSWORD=${QBITTORRENT_PASSWORD}
+      - MIN_FREE_GB=10
+      - RESUME_FREE_GB=15
+    volumes:
+      - ../scripts/qbit-diskguard.sh:/qbit-diskguard.sh:ro
+      - ${DOCKER_DIR}/qbit-diskguard:/state
+      - /mnt/media/data/torrents:/data/torrents:ro
+    restart: unless-stopped
+    network_mode: "service:gluetun"
+    depends_on:
+      - qbittorrent

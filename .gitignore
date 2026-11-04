@@ -26,3 +26,4 @@ grafana/**
 homepage/**
 prometheus/**
 .env
+qbit-diskguard/**
