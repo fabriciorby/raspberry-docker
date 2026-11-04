@@ -141,6 +141,7 @@ services:
       - traefik.http.routers.jellyseerr-by.tls=true
       - traefik.http.routers.jellyseerr-by.entrypoints=web,websecure
       - traefik.http.routers.jellyseerr-by.tls.certResolver=mytlschallenge
+      - traefik.http.routers.jellyseerr-by.middlewares=jellyseerr@docker,fail2ban-jellyseerr@docker
 
       - traefik.http.middlewares.jellyseerr.headers.SSLRedirect=true
       - traefik.http.middlewares.jellyseerr.headers.STSSeconds=315360000
@@ -385,6 +386,7 @@ services:
       - traefik.http.routers.kavita-by.tls=true
       - traefik.http.routers.kavita-by.entrypoints=web,websecure
       - traefik.http.routers.kavita-by.tls.certResolver=mytlschallenge
+      - traefik.http.routers.kavita-by.middlewares=kavita@docker,fail2ban-kavita@docker
 
       - traefik.http.middlewares.kavita.headers.SSLRedirect=true
       - traefik.http.middlewares.kavita.headers.STSSeconds=315360000

@@ -93,6 +93,7 @@ services:
       - traefik.http.routers.spotify-by.tls=true
       - traefik.http.routers.spotify-by.entrypoints=web,websecure
       - traefik.http.routers.spotify-by.tls.certResolver=mytlschallenge
+      - traefik.http.routers.spotify-by.middlewares=spotify@docker
 
       - traefik.http.middlewares.spotify.headers.SSLRedirect=true
       - traefik.http.middlewares.spotify.headers.STSSeconds=315360000
