@@ -43,11 +43,15 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.mytlschallenge.acme.tlschallenge=true"
+      # Uses the Cloudflare DNS challenge despite the name, so certificates renew behind the Cloudflare proxy
+      - "--certificatesresolvers.mytlschallenge.acme.dnschallenge.provider=cloudflare"
+      - "--certificatesresolvers.mytlschallenge.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
       - "--certificatesresolvers.mytlschallenge.acme.email=${SSL_EMAIL}"
       - "--certificatesresolvers.mytlschallenge.acme.storage=/letsencrypt/acme.json"
       # Loaded from traefik/plugins-local so startup doesn't depend on downloading it
       - "--experimental.localPlugins.fail2ban.moduleName=github.com/tomMoulard/fail2ban"
+    environment:
+      - CF_DNS_API_TOKEN=${CF_DNS_API_TOKEN}
     ports:
       - "80:80"
       - "443:443"
