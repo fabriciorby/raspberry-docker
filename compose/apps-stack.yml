@@ -124,8 +124,10 @@ services:
       - mongo
 
   mongo:
-    image: 'mongo:latest'
+    # Mongo 8 crashes on the 39-bit kernel8.img, which Immich's Redis needs (16K pages break jemalloc)
+    image: 'mongo:7.0'
     container_name: mongo
+    restart: unless-stopped
     ports:
       - '27017:27017'
     environment:
