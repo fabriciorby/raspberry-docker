@@ -32,7 +32,7 @@ up:
 		vpn) FILE=$(VPN_FILE) ;; \
 		photos) FILE=$(PHOTOS_FILE) ;; \
 		observability) FILE=$(OBSERVABILITY_FILE) ;; \
-		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
+		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn, photos, observability"; exit 1 ;; \
 	esac; \
 	echo "Bringing up project $(p)..."; \
 	$(DC) --env-file .env -p $(p) -f $$FILE up -d --remove-orphans
@@ -48,7 +48,7 @@ down:
 		vpn) FILE=$(VPN_FILE) ;; \
 		photos) FILE=$(PHOTOS_FILE) ;; \
 		observability) FILE=$(OBSERVABILITY_FILE) ;; \
-		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn"; exit 1 ;; \
+		*) echo "Error: unknown project '$(p)'. Available: media, infra, apps, torrent, pihole, vpn, photos, observability"; exit 1 ;; \
 	esac; \
 	echo "Stopping project $(p)..."; \
 	$(DC) --env-file .env -p $(p) -f $$FILE down
