@@ -11,15 +11,15 @@ docker/
 ├── .env.example                  # Example environment variables
 ├── compose/
 │   ├── apps-stack.yml            # Apps: n8n, Syncthing, your_spotify
-│   ├── media-stack.yml           # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi, Dispatcharr
-│   ├── infra-stack.yml           # Infrastructure: Traefik, Portainer, Heimdall, Watchtower,
+│   ├── media-stack.yml           # Media services: Jellyfin, Plex, Sonarr, Radarr, Bazarr, Lidarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi
+│   ├── infra-stack.yml           # Infrastructure: Traefik, Portainer, Homepage, Watchtower
 │   ├── vpn-stack.yml             # VPN services: Wireguard, DuckDNS
-│   ├── torrent-stack.yml         # Torrent services: Gluetun, qBittorrent
+│   ├── torrent-stack.yml         # Torrent services: Gluetun, qBittorrent, qbit-diskguard
 │   ├── pihole-stack.yml          # Pi-hole
 │   ├── immich-stack.yml          # Immich
 │   ├── observability-stack.yml   # Grafana, Prometheus and cAdvisor
-├── secrets/                      # Secrets for containers (e.g., db passwords)
-│   └── db_password.txt
+├── scripts/
+│   └── qbit-diskguard.sh         # Stops torrent downloads when the disk is low
 ├── Makefile                      # Helper commands to manage stacks
 ├── .gitignore
 └── README.md
@@ -32,10 +32,10 @@ docker/
 * Fully modular stacks:
 
   * App Stack: n8n, Syncthing, your_spotify
-  * Media Stack: Jellyfin, Plex, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi, Dispatcharr
-  * Infra Stack: Nginx, Portainer, Heimdall, Watchtower
+  * Media Stack: Jellyfin, Plex, Sonarr, Radarr, Lidarr, Bazarr, Prowlarr, Jellyseerr, Alternatrr, Maintainerr, Kavita, Suwayomi
+  * Infra Stack: Traefik, Portainer, Homepage, Watchtower
   * VPN Stack: Wireguard, DuckDNS
-  * Torrent Stack: Gluetun, qBittorrent
+  * Torrent Stack: Gluetun, qBittorrent, qbit-diskguard
   * Pi-hole Stack
   * Photos Stack: Immich
   * Observability: Grafana, Prometheus and cAdvisor
@@ -63,11 +63,7 @@ cp .env.example .env
 
 * Edit `.env` with your environment variables (API keys, etc.)
 
-### 3. (Optional) Add secrets
-
-* Place any secret files in `secrets/` and reference them in your Compose files
-
-### 4. Fetch the Traefik fail2ban plugin
+### 3. Fetch the Traefik fail2ban plugin
 
 ```bash
 git clone --depth 1 --branch v0.8.9 https://github.com/tomMoulard/fail2ban traefik/plugins-local/src/github.com/tomMoulard/fail2ban
@@ -83,7 +79,7 @@ git clone --depth 1 --branch v0.8.9 https://github.com/tomMoulard/fail2ban traef
 
 ```bash
 make up p=media     # Starts the media stack
-make up p=infra     # Starts infra stack (Nginx, Portainer, Heimdall)
+make up p=infra     # Starts infra stack (Traefik, Portainer, Homepage)
 ```
 
 ### Stop a single stack
@@ -104,7 +100,7 @@ make restart p=pihole
 make all
 ```
 
-* Recommended order ensures Nginx can resolve media services:
+* Recommended order ensures Traefik can resolve media services:
 
   1. Pi-hole
   2. VPN
@@ -112,7 +108,7 @@ make all
   4. Media (Jellyfin, Plex, etc.)
   5. Apps (n8n, Syncthing, your_spotify)
   6. Photos (Immich)
-  7. Infra (Traefik, Portainer, Heimdall)
+  7. Infra (Traefik, Portainer, Homepage)
   8. Observability (Grafana, Prometheus, cAdvisor)
 
 ### Stop all stacks
@@ -125,15 +121,15 @@ make down-all
 
 ## Networks
 
-* `media_infra_net` (external network): shared between Traefik and all apps and media services
-* `app_infra_net` (external network): shared between Traefik and all apps and media services
+* `media_infra_net`: shared between Traefik and the media services
+* `apps_infra_net`: shared between Traefik and the apps
 * Each stack also has its own default network for isolation:
 
   * VPN: `vpn_default`
-  * Pi-hole: `pihole_network`
+  * Pi-hole: `pihole_pihole_network` (macvlan)
   * Torrent: `torrent_default`
   * Infra: `infra_default`
-  * Observability: `monitoring`
+  * Observability: `observability_monitoring`
 
 ---
 
@@ -142,6 +138,7 @@ make down-all
 * Traefik must start after media services to resolve hostnames like `jellyfin`
 * Healthchecks can be added for reliable startup
 * Make sure the `.env` file exists in the project root; Compose uses it automatically
+* `qbit-diskguard` stops downloading torrents when the torrent disk has less than 10GB free, and starts them again above 15GB (set in `torrent-stack.yml`)
 * Orphan containers can be removed using:
 
 ```bash
@@ -165,7 +162,7 @@ docker compose -f compose/<stack>.yml up -d
 
 * Keep your media services and Traefik on the shared network (`media_infra_net`)
 * Other stacks can remain isolated
-* Use `.env` and `secrets/` to avoid committing sensitive data
+* Use `.env` to avoid committing sensitive data
 * Use Makefile commands to simplify stack management
 
 ---
@@ -174,5 +171,5 @@ docker compose -f compose/<stack>.yml up -d
 
 * [Docker Compose Documentation](https://docs.docker.com/compose/)
 * [Docker Networks](https://docs.docker.com/network/)
-* [LinuxServer.io Nginx](https://docs.linuxserver.io/images/docker-nginx)
+* [Traefik Documentation](https://doc.traefik.io/traefik/)
 
