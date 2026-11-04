@@ -363,6 +363,7 @@ services:
     volumes:
     - ${DOCKER_DIR}/sonarr/data:/opt/sonarr  #Mounting the directory with sonarr.db in it
     - ${DOCKER_DIR}/alternatrr/app:/opt/alternatrr/app #Mounting the alternatrr.db peristent login
+    restart: unless-stopped
 
   suwayomi_server:
     logging: *default-logging

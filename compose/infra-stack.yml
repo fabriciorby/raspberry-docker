@@ -8,8 +8,10 @@ services:
 
   watchtower:
     logging: *default-logging
-    image: containrrr/watchtower
+    # Maintained fork; containrrr/watchtower is unmaintained and too old for Docker 29's API
+    image: nickfedor/watchtower
     container_name: watchtower
+    restart: unless-stopped
     environment:
       - WATCHTOWER_CLEANUP=true
     volumes:
