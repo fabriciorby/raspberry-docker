@@ -147,8 +147,6 @@ services:
       - apps_infra_net
 
 networks:
-  apps_default:
-    external: true
   apps_infra_net:
     name: apps_infra_net
     driver: bridge

@@ -98,15 +98,6 @@ services:
       - 'traefik.http.routers.jellyfin.service=jellyfin-svc'
       - 'traefik.http.services.jellyfin-svc.loadBalancer.server.port=8096'
       - 'traefik.http.services.jellyfin-svc.loadBalancer.passHostHeader=true'
-
-      - 'traefik.http.routers.jellyfin-insecure.entryPoints=web'
-      - 'traefik.http.routers.jellyfin-insecure.rule=(Host(`home.${DOMAIN_NAME}`) || Host(`home.${DOMAIN_NAME_NEW}`)) && PathPrefix(`/jellyfin`)'
-      - 'traefik.http.routers.jellyfin-insecure.middlewares=jellyfin-insecure-mw,fail2ban-jellyfin@docker'
-
-      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.scheme=https'
-      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.port=9999' # remove if you are using a default port
-      - 'traefik.http.middlewares.jellyfin-insecure-mw.redirectscheme.permanent=false'
-      - 'traefik.http.routers.jellyfin-insecure.service=noop@internal'
       ## Fail2Ban
       - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
       - traefik.http.middlewares.fail2ban-jellyfin.plugin.fail2ban.rules.bantime=10m
@@ -439,12 +430,12 @@ services:
   #   image: ghcr.io/dispatcharr/dispatcharr:latest
   #   restart: unless-stopped
   #   container_name: dispatcharr
-    # labels:
-    #   - homepage.group=Media
-    #   - homepage.name=Dispatcharr
-    #   - homepage.icon=dispatcharr.svg
-    #   - homepage.href=${RASPBERRY_ADDRESS}:9191
-    #   - homepage.description=IPTV Management
+  #   labels:
+  #     - homepage.group=Media
+  #     - homepage.name=Dispatcharr
+  #     - homepage.icon=dispatcharr.svg
+  #     - homepage.href=${RASPBERRY_ADDRESS}:9191
+  #     - homepage.description=IPTV Management
   #   ports:
   #     - 9191:9191
   #   volumes:
