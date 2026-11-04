@@ -131,6 +131,43 @@ make down-all
   * Infra: `infra_default`
   * Observability: `observability_monitoring`
 
+### Reaching Pi-hole from WireGuard (macvlan bridge)
+
+Pi-hole runs on a macvlan network, and Docker doesn't let other containers or the host talk to a macvlan container directly, so WireGuard clients can't reach Pi-hole. The fix is a macvlan interface on the host bridged to the Pi-hole network.
+
+Create the Pi-hole network first (`make up p=pihole`), then, after WireGuard is up, run:
+
+```bash
+sudo ip link add macvlan0 link eth0 type macvlan mode bridge
+sudo ip addr add ${PIHOLE_BRIDGE} dev macvlan0
+sudo ip link set macvlan0 up
+```
+
+To keep it after a reboot, create `/etc/systemd/system/macvlan0.service`. systemd doesn't read `.env`, so write the actual `PIHOLE_BRIDGE` address instead of the variable:
+
+```ini
+[Unit]
+Description=Create macvlan0 for WireGuard
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/ip link add macvlan0 link eth0 type macvlan mode bridge
+ExecStart=/sbin/ip addr add <PIHOLE_BRIDGE> dev macvlan0
+ExecStart=/sbin/ip link set macvlan0 up
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable it:
+
+```bash
+sudo systemctl enable macvlan0.service
+sudo systemctl start macvlan0.service
+```
+
 ---
 
 ## Notes
