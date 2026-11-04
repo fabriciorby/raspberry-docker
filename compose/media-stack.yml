@@ -46,7 +46,7 @@ services:
       - homepage.widget.type=jellyfin
       - homepage.widget.url=https://home.${DOMAIN_NAME}/jellyfin
       - homepage.widget.key=${JELLYFIN_API_KEY}
-      - homepage.widget.version=1
+      - homepage.widget.version=2
       - homepage.widget.enableBlocks=true
       - homepage.widget.enableNowPlaying=true
       - homepage.widget.enableUser=true
