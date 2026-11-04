@@ -161,7 +161,7 @@ services:
       # - traefik.http.middlewares.f2b.plugin.fail2ban.rules.urlregexps[0].mode=allow
       - traefik.http.routers.jellyseerr.middlewares=jellyseerr@docker,fail2ban-jellyseerr@docker
     environment:
-      - LOG_LEVEL=debug
+      - LOG_LEVEL=info
       - TZ=${GENERIC_TIMEZONE}
     ports:
       - 5055:5055
