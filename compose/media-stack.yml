@@ -342,7 +342,6 @@ services:
   alternatrr:
     logging: *default-logging
     image: ghcr.io/soredake/alternatrr:latest
-    platform: linux/amd64
     container_name: alternatrr
     labels:
       - homepage.group=Media
