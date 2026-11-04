@@ -13,8 +13,12 @@ services:
       - homepage.group=PiHole
       - homepage.name=PiHole
       - homepage.icon=pi-hole.svg
-      - homepage.href=${PIHOLE_NETWORK_IP}
-      - homepage.description=Metrics exporter
+      - homepage.href=http://${PIHOLE_NETWORK_IP}/admin
+      - homepage.description=DNS ad blocker
+      - homepage.widget.type=pihole
+      - homepage.widget.url=http://${PIHOLE_NETWORK_IP}
+      - homepage.widget.version=6
+      - homepage.widget.key=${PIHOLE_API_KEY}
     image: pihole/pihole:latest
     ports:
       # DNS Ports

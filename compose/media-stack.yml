@@ -16,6 +16,9 @@ services:
       - homepage.icon=plex.svg
       - homepage.href=${RASPBERRY_ADDRESS}:32400
       - homepage.description=Plex
+      - homepage.widget.type=plex
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:32400
+      - homepage.widget.key=${PLEX_TOKEN}
     network_mode: host
     environment:
       - PUID=${PUID}

@@ -62,6 +62,8 @@ services:
       - homepage.icon=prometheus.svg
       - homepage.href=${RASPBERRY_ADDRESS}:9090
       - homepage.description=Metrics scraper
+      - homepage.widget.type=prometheus
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:9090
     restart: unless-stopped
     volumes:
       - ../prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro

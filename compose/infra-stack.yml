@@ -25,8 +25,12 @@ services:
       - homepage.group=Infra
       - homepage.name=Portainer
       - homepage.icon=portainer.svg
-      - homepage.href=https://${RASPBERRY_ADDRESS}:9443
+      - homepage.href=https://${RASPBERRY_IP}:9443
       - homepage.description=Docker Management
+      - homepage.widget.type=portainer
+      - homepage.widget.url=https://${RASPBERRY_IP}:9443
+      - homepage.widget.env=3
+      - homepage.widget.key=${PORTAINER_API_KEY}
     ports:
       - 9443:9443
     volumes:
@@ -45,6 +49,8 @@ services:
       - homepage.icon=traefik.svg
       - homepage.href=${RASPBERRY_ADDRESS}:8081
       - homepage.description=Docker Reverse Proxy
+      - homepage.widget.type=traefik
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:8081
     command:
       # - "--log.level=DEBUG"
       - "--api.insecure=true"
@@ -88,7 +94,10 @@ services:
         # Pasta onde ficarão as configurações do painel
         - ../homepage/config:/app/config 
         # Necessário para ele "ler" os outros containers do Docker
-        - /var/run/docker.sock:/var/run/docker.sock:ro 
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        # Discos mostrados no widget de recursos
+        - /mnt/media:/mnt/media:ro
+        - /mnt/drive:/mnt/drive:ro
       # Como você usa Traefik, não precisa abrir portas, basta colocar as labels do Traefik aqui:
       ports:
        - "3001:3000"

@@ -10,15 +10,27 @@ services:
     logging: *default-logging
     image: qmcgaw/gluetun
     container_name: gluetun
-    environment: 
+    labels:
+      - homepage.group=Torrent
+      - homepage.name=Gluetun
+      - homepage.icon=gluetun.svg
+      - homepage.description=VPN
+      - homepage.widget.type=gluetun
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:8000
+      - homepage.widget.key=${GLUETUN_API_KEY}
+      - homepage.widget.version=2
+    environment:
       - VPN_SERVICE_PROVIDER=mullvad
       - VPN_TYPE=wireguard
       - WIREGUARD_PRIVATE_KEY=${WIREGUARD_PRIVATE_KEY}
       - WIREGUARD_ADDRESSES=${WIREGUARD_ADDRESSES}
       - SERVER_CITIES=Zurich
+      # Control server API (used by the Homepage widget)
+      - HTTP_CONTROL_SERVER_AUTH_DEFAULT_ROLE={"auth":"apikey","apikey":"${GLUETUN_API_KEY}"}
     cap_add:
       - NET_ADMIN
     ports:
+      - 8000:8000
       - 8080:8080
       - 6881:6881
       - 6881:6881/udp
@@ -34,6 +46,11 @@ services:
       - homepage.icon=qbittorrent.svg
       - homepage.href=${RASPBERRY_ADDRESS}:8080
       - homepage.description=Torrent
+      - homepage.widget.type=qbittorrent
+      - homepage.widget.url=${RASPBERRY_ADDRESS}:8080
+      - homepage.widget.username=${QBITTORRENT_USERNAME}
+      - homepage.widget.password=${QBITTORRENT_PASSWORD}
+      - homepage.widget.enableLeechProgress=true
     environment:
       - PUID=${PUID}
       - PGID=${PGID}
