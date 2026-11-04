@@ -67,6 +67,14 @@ cp .env.example .env
 
 * Place any secret files in `secrets/` and reference them in your Compose files
 
+### 4. Fetch the Traefik fail2ban plugin
+
+```bash
+git clone --depth 1 --branch v0.8.9 https://github.com/tomMoulard/fail2ban traefik/plugins-local/src/github.com/tomMoulard/fail2ban
+```
+
+* Traefik loads the plugin from disk instead of downloading it at startup, so the routers using fail2ban keep working after a boot without internet
+
 ---
 
 ## Makefile Usage
