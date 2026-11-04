@@ -6,7 +6,7 @@
 #   make down-all        # stop all projects
 
 SHELL := /bin/bash
-DC=docker-compose        # change to 'docker compose' if you upgrade Docker CLI
+DC=docker compose
 COMPOSE_DIR=compose
 
 # Compose files

@@ -142,19 +142,15 @@ make down-all
 * Orphan containers can be removed using:
 
 ```bash
-docker-compose -f compose/<stack>.yml down --remove-orphans
+docker compose -f compose/<stack>.yml down --remove-orphans
 ```
 
 ---
 
 ## Docker Version
 
-* Tested with Docker 20.10+ and `docker-compose` v1.29+
-* If using the new CLI:
-
-```bash
-docker compose -f compose/<stack>.yml up -d
-```
+* Tested with Docker CE 29 and the `docker compose` v2 plugin, from Docker's official apt repository
+* Debian's own `docker.io` package (20.10) is too old: it can't unpack some newer images (`invalid tar header`)
 
 ---
 
