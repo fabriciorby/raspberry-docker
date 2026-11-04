@@ -118,14 +118,15 @@ services:
       - media_infra_net
     entrypoint: ['sh', '-c', '/usr/share/jellyfin/web/UI/install-spotlight.sh && exec /init']
 
-  jellyseerr:
+  seerr:
     logging: *default-logging
-    image: fallenbagel/jellyseerr:latest
-    container_name: jellyseerr
+    image: ghcr.io/seerr-team/seerr:latest
+    init: true
+    container_name: seerr
     labels:
       - homepage.group=Media
-      - homepage.name=Jellyseerr
-      - homepage.icon=jellyseerr.svg
+      - homepage.name=Seerr
+      - homepage.icon=seerr.svg
       - homepage.href=https://discover.${DOMAIN_NAME}
       - homepage.description=User frienfly movie requester
       - homepage.widget.type=seerr
@@ -134,44 +135,44 @@ services:
       - homepage.widget.fields=["pending","approved","available","completed"]
 
       - traefik.enable=true
-      - traefik.http.routers.jellyseerr.rule=Host(`discover.${DOMAIN_NAME}`)
-      - traefik.http.routers.jellyseerr.tls=true
-      - traefik.http.routers.jellyseerr.entrypoints=web,websecure
-      - traefik.http.routers.jellyseerr.tls.certresolver=mytlschallenge
+      - traefik.http.routers.seerr.rule=Host(`discover.${DOMAIN_NAME}`)
+      - traefik.http.routers.seerr.tls=true
+      - traefik.http.routers.seerr.entrypoints=web,websecure
+      - traefik.http.routers.seerr.tls.certresolver=mytlschallenge
 
       # Segundo Domínio (.by)
-      - traefik.http.routers.jellyseerr-by.rule=Host(`discover.${DOMAIN_NAME_NEW}`)
-      - traefik.http.routers.jellyseerr-by.tls=true
-      - traefik.http.routers.jellyseerr-by.entrypoints=web,websecure
-      - traefik.http.routers.jellyseerr-by.tls.certResolver=mytlschallenge
-      - traefik.http.routers.jellyseerr-by.middlewares=jellyseerr@docker,fail2ban-jellyseerr@docker
+      - traefik.http.routers.seerr-by.rule=Host(`discover.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.seerr-by.tls=true
+      - traefik.http.routers.seerr-by.entrypoints=web,websecure
+      - traefik.http.routers.seerr-by.tls.certResolver=mytlschallenge
+      - traefik.http.routers.seerr-by.middlewares=seerr@docker,fail2ban-seerr@docker
 
-      - traefik.http.middlewares.jellyseerr.headers.SSLRedirect=true
-      - traefik.http.middlewares.jellyseerr.headers.STSSeconds=315360000
-      - traefik.http.middlewares.jellyseerr.headers.browserXSSFilter=true
-      - traefik.http.middlewares.jellyseerr.headers.contentTypeNosniff=true
-      - traefik.http.middlewares.jellyseerr.headers.forceSTSHeader=true
-      # - traefik.http.middlewares.jellyseerr.headers.SSLHost=${DOMAIN_NAME}
-      - traefik.http.middlewares.jellyseerr.headers.STSIncludeSubdomains=true
-      - traefik.http.middlewares.jellyseerr.headers.STSPreload=true
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.bantime=10m
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.enabled=true
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.findtime=10m
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.maxretry=4
-      - traefik.http.middlewares.fail2ban-jellyseerr.plugin.fail2ban.rules.statuscode=401
+      - traefik.http.middlewares.seerr.headers.SSLRedirect=true
+      - traefik.http.middlewares.seerr.headers.STSSeconds=315360000
+      - traefik.http.middlewares.seerr.headers.browserXSSFilter=true
+      - traefik.http.middlewares.seerr.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.seerr.headers.forceSTSHeader=true
+      # - traefik.http.middlewares.seerr.headers.SSLHost=${DOMAIN_NAME}
+      - traefik.http.middlewares.seerr.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.seerr.headers.STSPreload=true
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.allowlist.ip=::1,127.0.0.1
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.rules.bantime=10m
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.rules.maxretry=4
+      - traefik.http.middlewares.fail2ban-seerr.plugin.fail2ban.rules.statuscode=401
       # - traefik.http.middlewares.f2b.plugin.fail2ban.rules.urlregexps[0].regexp=/api/v1/auth/me
       # - traefik.http.middlewares.f2b.plugin.fail2ban.rules.urlregexps[0].mode=allow
-      - traefik.http.routers.jellyseerr.middlewares=jellyseerr@docker,fail2ban-jellyseerr@docker
+      - traefik.http.routers.seerr.middlewares=seerr@docker,fail2ban-seerr@docker
     environment:
       - LOG_LEVEL=info
       - TZ=${GENERIC_TIMEZONE}
     ports:
       - 5055:5055
     volumes:
-      - ${DOCKER_DIR}/jellyseerr/config:/app/config
+      - ${DOCKER_DIR}/seerr/config:/app/config
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/status || exit 1
+      test: wget --no-verbose --tries=1 --spider http://localhost:5055/api/v1/settings/public || exit 1
       start_period: 20s
       timeout: 3s
       interval: 15s
