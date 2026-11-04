@@ -138,7 +138,7 @@ make down-all
 * Traefik must start after media services to resolve hostnames like `jellyfin`
 * Healthchecks can be added for reliable startup
 * Make sure the `.env` file exists in the project root; Compose uses it automatically
-* `qbit-diskguard` stops downloading torrents when the torrent disk has less than 10GB free, and starts them again above 15GB (set in `torrent-stack.yml`)
+* `qbit-diskguard` stops downloading torrents when the torrent disk has less than 50GB free, and starts them again above 55GB (set in `torrent-stack.yml`)
 * Orphan containers can be removed using:
 
 ```bash

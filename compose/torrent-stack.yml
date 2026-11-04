@@ -57,8 +57,8 @@ services:
       - TZ=${GENERIC_TIMEZONE}
       - QBITTORRENT_USERNAME=${QBITTORRENT_USERNAME}
       - QBITTORRENT_PASSWORD=${QBITTORRENT_PASSWORD}
-      - MIN_FREE_GB=10
-      - RESUME_FREE_GB=15
+      - MIN_FREE_GB=50
+      - RESUME_FREE_GB=55
     volumes:
       - ../scripts/qbit-diskguard.sh:/qbit-diskguard.sh:ro
       - ${DOCKER_DIR}/qbit-diskguard:/state
