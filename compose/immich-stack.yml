@@ -30,6 +30,24 @@ services:
       - homepage.widget.key=${IMMICH_API_KEY}
       - homepage.widget.fields=["users","photos","videos","storage"]
       - homepage.widget.version=2
+      - traefik.enable=true
+      - traefik.docker.network=immich_infra_net
+      - traefik.http.routers.immich.rule=Host(`photos.${DOMAIN_NAME}`)
+      - traefik.http.routers.immich.tls=true
+      - traefik.http.routers.immich.entrypoints=web,websecure
+      - traefik.http.routers.immich.tls.certresolver=mytlschallenge
+      - traefik.http.services.immich.loadbalancer.server.port=2283
+      - traefik.http.middlewares.immich.headers.SSLRedirect=true
+      - traefik.http.middlewares.immich.headers.STSSeconds=315360000
+      - traefik.http.middlewares.immich.headers.browserXSSFilter=true
+      - traefik.http.middlewares.immich.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.immich.headers.forceSTSHeader=true
+      - traefik.http.middlewares.immich.headers.STSIncludeSubdomains=true
+      - traefik.http.middlewares.immich.headers.STSPreload=true
+      # Proxied through Cloudflare: only accept Cloudflare edges, LAN and WireGuard so the WAF can't be bypassed via the home IP.
+      # fail2ban is left out because it would see Cloudflare IPs; brute force is rate limited at Cloudflare instead
+      - traefik.http.middlewares.immich-allowlist.ipallowlist.sourcerange=${CLOUDFLARE_IPS},192.168.0.0/16,10.13.13.0/24
+      - traefik.http.routers.immich.middlewares=immich-allowlist@docker,immich@docker
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     # extends:
     #   file: hwaccel.transcoding.yml
@@ -38,11 +56,13 @@ services:
       # Do not edit the next line. If you want to change the media storage location on your system, edit the value of UPLOAD_LOCATION in the .env file
       - ${UPLOAD_LOCATION}:/data
       - /etc/localtime:/etc/localtime:ro
-      - /mnt/drive:/drive
     env_file:
       - ../.env
     ports:
       - '2283:2283'
+    networks:
+      - default
+      - immich_infra_net
     depends_on:
       - redis
       - database
@@ -94,3 +114,8 @@ services:
 
 volumes:
   model-cache:
+
+networks:
+  immich_infra_net:
+    name: immich_infra_net
+    driver: bridge

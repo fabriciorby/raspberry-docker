@@ -60,6 +60,12 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
       - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
       - "--entrypoints.websecure.address=:443"
+      # Traefik v3 defaults readTimeout to 60s, which cuts off large Immich uploads
+      - "--entrypoints.websecure.transport.respondingTimeouts.readTimeout=600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=600s"
+      - "--entrypoints.websecure.transport.respondingTimeouts.idleTimeout=600s"
+      # Trust X-Forwarded-For from Cloudflare so apps see the real client IP
+      - "--entrypoints.websecure.forwardedHeaders.trustedIPs=${CLOUDFLARE_IPS}"
       # Uses the Cloudflare DNS challenge despite the name, so certificates renew behind the Cloudflare proxy
       - "--certificatesresolvers.mytlschallenge.acme.dnschallenge.provider=cloudflare"
       - "--certificatesresolvers.mytlschallenge.acme.dnschallenge.resolvers=1.1.1.1:53,1.0.0.1:53"
@@ -81,6 +87,7 @@ services:
       - infra_default
       - media_infra_net
       - apps_infra_net
+      - immich_infra_net
 
   homepage:
       logging: *default-logging
@@ -112,4 +119,6 @@ networks:
   media_infra_net:
     external: true
   apps_infra_net:
+    external: true
+  immich_infra_net:
     external: true
