@@ -36,6 +36,11 @@ services:
       # and login brute force is rate limited at Cloudflare instead
       - traefik.http.middlewares.n8n-allowlist.ipallowlist.sourcerange=${CLOUDFLARE_IPS},192.168.0.0/16,10.13.13.0/24
       - traefik.http.routers.n8n.middlewares=n8n-allowlist@docker,n8n@docker
+      - traefik.http.routers.n8n-by.rule=Host(`${SUBDOMAIN}.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.n8n-by.tls=true
+      - traefik.http.routers.n8n-by.entrypoints=web,websecure
+      - traefik.http.routers.n8n-by.tls.certresolver=mytlschallenge
+      - traefik.http.routers.n8n-by.middlewares=n8n-allowlist@docker,n8n@docker
     environment:
       - N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
       - N8N_HOST=${SUBDOMAIN}.${DOMAIN_NAME}

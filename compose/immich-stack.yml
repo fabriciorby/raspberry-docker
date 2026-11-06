@@ -53,6 +53,12 @@ services:
       - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.maxretry=10
       - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.statuscode=401
       - traefik.http.routers.immich.middlewares=immich@docker,fail2ban-immich@docker
+      - traefik.http.routers.immich-by.rule=Host(`photos.${DOMAIN_NAME_NEW}`)
+      - traefik.http.routers.immich-by.tls=true
+      - traefik.http.routers.immich-by.entrypoints=web,websecure
+      - traefik.http.routers.immich-by.tls.certresolver=mytlschallenge
+      - traefik.http.routers.immich-by.service=immich
+      - traefik.http.routers.immich-by.middlewares=immich@docker,fail2ban-immich@docker
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     # extends:
     #   file: hwaccel.transcoding.yml
