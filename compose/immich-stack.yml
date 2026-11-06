@@ -44,10 +44,15 @@ services:
       - traefik.http.middlewares.immich.headers.forceSTSHeader=true
       - traefik.http.middlewares.immich.headers.STSIncludeSubdomains=true
       - traefik.http.middlewares.immich.headers.STSPreload=true
-      # Proxied through Cloudflare: only accept Cloudflare edges, LAN and WireGuard so the WAF can't be bypassed via the home IP.
-      # fail2ban is left out because it would see Cloudflare IPs; brute force is rate limited at Cloudflare instead
-      - traefik.http.middlewares.immich-allowlist.ipallowlist.sourcerange=${CLOUDFLARE_IPS},192.168.0.0/16,10.13.13.0/24
-      - traefik.http.routers.immich.middlewares=immich-allowlist@docker,immich@docker
+      # DNS-only (grey cloud) so uploads skip Cloudflare's 100 MB limit, which lets fail2ban see real client IPs.
+      # maxretry is looser than the other services because an expired session fires a burst of 401s; LAN/WireGuard can't be banned
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.allowlist.ip=::1,127.0.0.1,192.168.0.0/16,10.13.13.0/24
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.bantime=30m
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.enabled=true
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.findtime=10m
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.maxretry=10
+      - traefik.http.middlewares.fail2ban-immich.plugin.fail2ban.rules.statuscode=401
+      - traefik.http.routers.immich.middlewares=immich@docker,fail2ban-immich@docker
     image: ghcr.io/immich-app/immich-server:${IMMICH_VERSION:-release}
     # extends:
     #   file: hwaccel.transcoding.yml
