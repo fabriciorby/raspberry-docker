@@ -77,7 +77,7 @@ services:
     volumes:
       - ${DOCKER_DIR}/syncthing/config:/config
       - ${DOCKER_DIR}:/docker
-      - /mnt/drive/sync:/sync
+      - ${SYNC_DIR:-/mnt/drive/sync}:/sync
     ports:
       - 8384:8384
       - 22000:22000/tcp
