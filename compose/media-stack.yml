@@ -336,7 +336,7 @@ services:
 
   alternatrr:
     logging: *default-logging
-    image: ghcr.io/soredake/alternatrr:latest
+    image: ghcr.io/theultimatec0der/alternatrr:latest
     container_name: alternatrr
     labels:
       - homepage.group=Media
