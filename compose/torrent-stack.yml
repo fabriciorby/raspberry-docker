@@ -59,7 +59,7 @@ services:
       - TORRENTING_PORT=6881
     volumes:
       - ${DOCKER_DIR}/qbittorrent/appdata:/config
-      - /mnt/media/data/torrents:/data/torrents
+      - ${DATA_DIR:-/mnt/media/data}/torrents:/data/torrents
     restart: unless-stopped
     network_mode: "service:gluetun"
 
@@ -79,7 +79,7 @@ services:
     volumes:
       - ../scripts/qbit-diskguard.sh:/qbit-diskguard.sh:ro
       - ${DOCKER_DIR}/qbit-diskguard:/state
-      - /mnt/media/data/torrents:/data/torrents:ro
+      - ${DATA_DIR:-/mnt/media/data}/torrents:/data/torrents:ro
     restart: unless-stopped
     network_mode: "service:gluetun"
     depends_on:
